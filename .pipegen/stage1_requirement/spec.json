@@ -1,0 +1,49 @@
+{
+  "project_name": "OmniRetail-Sentinel",
+  "version": "1.0.0",
+  "framework": "CraftifAI PipeGen v0.5.1",
+  "target_platform": "NVIDIA Jetson Orin / x86-64 RTX GPU (DeepStream 7.0 / TensorRT 10.x)",
+  "problem_statement": "Retail stores suffer from lost sales, customer churn, and operational inefficiency due to unmonitored checkout queue buildup, aisle congestion, and lack of real-time store occupancy analytics.",
+  "functional_requirements": [
+    {
+      "id": "REQ-01",
+      "category": "Perception & Detection",
+      "description": "Real-time detection of customers and staff in wide-angle overhead RTSP video stream at 60 FPS.",
+      "model": "YOLOv8x-Retail / PeopleNet-ResNet34",
+      "target_class": ["person", "shopping_cart", "basket"],
+      "confidence_threshold": 0.55
+    },
+    {
+      "id": "REQ-02",
+      "category": "Multi-Object Tracking",
+      "description": "Continuous ID assignment across frame occlusions using NvDCF (NVIDIA Deep Color Features) tracker.",
+      "tracking_algorithm": "NvDCF / ByteTrack",
+      "max_shadow_tracking_frames": 30
+    },
+    {
+      "id": "REQ-03",
+      "category": "Edge Analytics - Virtual Tripwires",
+      "description": "Bi-directional entrance boundary line crossing detection (Customer IN / OUT counting).",
+      "precision_target": ">= 98.5% counting accuracy"
+    },
+    {
+      "id": "REQ-04",
+      "category": "Edge Analytics - Queue ROI & Dwell Time",
+      "description": "Dynamic polygon ROI monitoring around checkout counters. Track queue head count and cumulative waiting dwell time.",
+      "queue_congestion_threshold": 4,
+      "max_acceptable_dwell_sec": 45
+    },
+    {
+      "id": "REQ-05",
+      "category": "Actionable Edge Dispatch",
+      "description": "Trigger real-time alert event when queue size exceeds 4 customers for > 15 seconds. Publish MQTT dispatch message to call next available cashier and signal hardware beacon.",
+      "protocol": "MQTT 3.1.1 / JSON over WebSockets / Serial UART to ESP32"
+    }
+  ],
+  "hardware_constraints": {
+    "target_fps": 60,
+    "max_inference_latency_ms": 12.5,
+    "precision": "FP16 (fallback to INT8 on Jetson)",
+    "max_gpu_memory_mb": 1800
+  }
+}

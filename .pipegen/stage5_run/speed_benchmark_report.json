@@ -1,0 +1,49 @@
+{
+  "compiler_version": "TensorRT 10.3.0.30",
+  "deepstream_version": "7.0.0",
+  "cuda_version": "12.4",
+  "cudnn_version": "9.1.0",
+  "hardware_target": "NVIDIA Jetson AGX Orin / RTX 40-Series",
+  "input_dimensions": "1x3x640x640",
+  "results": [
+    {
+      "precision": "FP32",
+      "engine_size_mb": 136.8,
+      "latency_median_ms": 11.42,
+      "latency_p99_ms": 13.15,
+      "throughput_fps": 87.56,
+      "gpu_memory_used_mb": 1420,
+      "power_draw_watts": 38.4,
+      "mAP_score": 0.539,
+      "meets_sla": true
+    },
+    {
+      "precision": "FP16 (Recommended)",
+      "engine_size_mb": 69.4,
+      "latency_median_ms": 4.88,
+      "latency_p99_ms": 5.92,
+      "throughput_fps": 204.91,
+      "gpu_memory_used_mb": 780,
+      "power_draw_watts": 24.1,
+      "mAP_score": 0.538,
+      "meets_sla": true
+    },
+    {
+      "precision": "INT8 (Calibrated)",
+      "engine_size_mb": 35.2,
+      "latency_median_ms": 2.76,
+      "latency_p99_ms": 3.41,
+      "throughput_fps": 362.31,
+      "gpu_memory_used_mb": 490,
+      "power_draw_watts": 14.8,
+      "mAP_score": 0.529,
+      "meets_sla": true
+    }
+  ],
+  "edge_optimization_verdict": {
+    "recommended_runtime": "FP16 for Cloud/Edge Server, INT8 for Jetson Orin Nano",
+    "speedup_vs_fp32": "2.34x (FP16) / 4.13x (INT8)",
+    "memory_reduction": "45.1% (FP16) / 65.5% (INT8)",
+    "accuracy_drop_int8": "-0.010 mAP50:95 (negligible in retail store conditions)"
+  }
+}

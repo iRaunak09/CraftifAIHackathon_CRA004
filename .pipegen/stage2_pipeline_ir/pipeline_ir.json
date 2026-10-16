@@ -1,0 +1,144 @@
+{
+  "pipeline_name": "omniretail_edge_sentinel_ir",
+  "version": "0.5.1",
+  "generated_by": "CraftifAI PipeGen IR Generator",
+  "target_backend": "NVIDIA DeepStream 7.0 / GStreamer 1.20",
+  "nodes": [
+    {
+      "id": "node_0_source",
+      "plugin": "nvurisrcbin",
+      "type": "source",
+      "properties": {
+        "uri": "file:///opt/craftifai/samples/retail_store_cam01.mp4",
+        "num_sources": 1,
+        "gpu_id": 0,
+        "cudadec_memtype": 0
+      },
+      "outputs": ["pad_src_0"]
+    },
+    {
+      "id": "node_1_streammux",
+      "plugin": "nvstreammux",
+      "type": "batcher",
+      "properties": {
+        "batch_size": 1,
+        "width": 1920,
+        "height": 1080,
+        "batched_push_timeout": 33333,
+        "live_source": 1,
+        "nvbuf_memory_type": 0
+      },
+      "inputs": ["node_0_source.pad_src_0"],
+      "outputs": ["pad_src_mux"]
+    },
+    {
+      "id": "node_2_primary_gie",
+      "plugin": "nvinfer",
+      "type": "detector",
+      "properties": {
+        "config_file_path": "./models/config_infer_primary.txt",
+        "model_engine_file": "./models/yolov8_retail_fp16.engine",
+        "unique_id": 1,
+        "gpu_id": 0,
+        "batch_size": 1,
+        "process_mode": 1
+      },
+      "inputs": ["node_1_streammux.pad_src_mux"],
+      "outputs": ["pad_src_gie"]
+    },
+    {
+      "id": "node_3_tracker",
+      "plugin": "nvtracker",
+      "type": "multi_object_tracker",
+      "properties": {
+        "ll_lib_file": "/opt/nvidia/deepstream/deepstream/lib/libnvds_nvmultiobjecttracker.so",
+        "ll_config_file": "./pipeline/config_tracker_NvDCF.yml",
+        "tracker_width": 640,
+        "tracker_height": 384,
+        "gpu_id": 0,
+        "display_tracking_id": 1
+      },
+      "inputs": ["node_2_primary_gie.pad_src_gie"],
+      "outputs": ["pad_src_tracker"]
+    },
+    {
+      "id": "node_4_analytics",
+      "plugin": "nvdsanalytics",
+      "type": "spatial_analytics",
+      "properties": {
+        "config_file": "./pipeline/deepstream_nvdsanalytics_config.txt",
+        "enable": 1
+      },
+      "inputs": ["node_3_tracker.pad_src_tracker"],
+      "outputs": ["pad_src_analytics"]
+    },
+    {
+      "id": "node_5_msgconv",
+      "plugin": "nvmsgconv",
+      "type": "message_converter",
+      "properties": {
+        "config": "./pipeline/msgconv_schema_retail.txt",
+        "payload_type": 0,
+        "msg2p_newapi": 1
+      },
+      "inputs": ["node_4_analytics.pad_src_analytics"],
+      "outputs": ["pad_src_msgconv"]
+    },
+    {
+      "id": "node_6_msgbroker",
+      "plugin": "nvmsgbroker",
+      "type": "message_broker",
+      "properties": {
+        "proto_lib": "/opt/nvidia/deepstream/deepstream/lib/libnvds_mqtt_proto.so",
+        "conn_str": "localhost;1883;retail/stream/telemetry",
+        "topic": "retail/store1/events"
+      },
+      "inputs": ["node_5_msgconv.pad_src_msgconv"],
+      "outputs": []
+    },
+    {
+      "id": "node_7_osd",
+      "plugin": "nvdsosd",
+      "type": "on_screen_display",
+      "properties": {
+        "process_mode": 2,
+        "display_text": 1,
+        "display_bbox": 1,
+        "display_mask": 0
+      },
+      "inputs": ["node_4_analytics.pad_src_analytics"],
+      "outputs": ["pad_src_osd"]
+    },
+    {
+      "id": "node_8_sink",
+      "plugin": "nveglglessink",
+      "type": "sink",
+      "properties": {
+        "sync": 0,
+        "async": 0
+      },
+      "inputs": ["node_7_osd.pad_src_osd"],
+      "outputs": []
+    }
+  ],
+  "analytics_zones": {
+    "tripwire_entrance": {
+      "type": "line_crossing",
+      "coords": [[120, 950], [900, 950]],
+      "direction": "bi_directional",
+      "mode": ["entry_in", "exit_out"]
+    },
+    "roi_checkout_queue": {
+      "type": "polygon_roi",
+      "coords": [[950, 400], [1650, 400], [1650, 850], [950, 850]],
+      "trigger_class": "person",
+      "threshold_count": 4,
+      "max_dwell_seconds": 15
+    },
+    "roi_promotional_aisle": {
+      "type": "heat_zone",
+      "coords": [[200, 300], [750, 300], [750, 700], [200, 700]],
+      "trigger_class": "person"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+# DeepStream nvdsanalytics configuration for Retail Store & Queue Analytics
+[property]
+enable=1
+config-width=1920
+config-height=1080
+osd-mode=2
+display-font-size=14
+
+# Entrance Tripwire Line Crossing
+[line-crossing-stream-0]
+enable=1
+line-crossing-Entrance-In=120;950;900;950;0;1
+line-crossing-Entrance-Out=120;950;900;950;1;0
+class-id=0
+extended=0
+mode=balanced
+
+# Checkout Queue ROI Polygon
+[roi-filtering-stream-0]
+enable=1
+roi-Checkout-Queue=950;400;1650;400;1650;850;950;850
+inverse-roi=0
+class-id=0
+
+# Overcrowd & Dwell Time Analytics
+[overcrowding-stream-0]
+enable=1
+roi-Checkout-Queue=4
+class-id=0
+
+[direction-detection-stream-0]
+enable=1
+direction-Entrance-In=90;100;0;1
+class-id=0
