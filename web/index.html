@@ -107,6 +107,11 @@
 
         <!-- The Vision Canvas inside the Blue Card -->
         <div class="canvas-box">
+          <div class="hud-corner-reticle reticle-tl"></div>
+          <div class="hud-corner-reticle reticle-tr"></div>
+          <div class="hud-corner-reticle reticle-bl"></div>
+          <div class="hud-corner-reticle reticle-br"></div>
+          
           <video id="webcam-feed" playsinline autoplay muted style="display:none;"></video>
           <canvas id="vision-canvas" width="1280" height="720"></canvas>
           
@@ -137,6 +142,12 @@
         <span class="val-metric" id="kpi-occupancy">24</span>
         <span class="val-unit">/ 60 OCCUPANCY</span>
       </div>
+      <div class="card-sparkline-wrap">
+        <svg class="mini-sparkline" id="sparkline-occupancy" viewBox="0 0 160 32" preserveAspectRatio="none">
+          <path class="sparkline-area" id="sparkline-occupancy-area" d=""></path>
+          <path class="sparkline-line" id="sparkline-occupancy-line" d=""></path>
+        </svg>
+      </div>
       <div class="mini-progress-track">
         <div class="mini-progress-fill" id="occupancy-bar" style="width: 40%;"></div>
       </div>
@@ -149,6 +160,16 @@
         <span class="val-metric" id="kpi-queue-count">3</span>
         <span class="val-badge badge-normal" id="queue-badge">NORMAL</span>
       </div>
+      <div class="queue-density-meter" id="queue-density-meter">
+        <span class="meter-bar active"></span>
+        <span class="meter-bar active"></span>
+        <span class="meter-bar active"></span>
+        <span class="meter-bar"></span>
+        <span class="meter-bar"></span>
+        <span class="meter-bar"></span>
+        <span class="meter-bar"></span>
+        <span class="meter-bar"></span>
+      </div>
       <p class="val-sub" id="queue-status-text">Flow steady. No backup registers needed.</p>
     </div>
 
@@ -158,14 +179,27 @@
         <span class="val-metric" id="kpi-wait-time">33.0</span>
         <span class="val-unit">SECONDS WAIT</span>
       </div>
+      <div class="card-sparkline-wrap">
+        <svg class="mini-sparkline" id="sparkline-wait" viewBox="0 0 160 32" preserveAspectRatio="none">
+          <path class="sparkline-area" id="sparkline-wait-area" d=""></path>
+          <path class="sparkline-line" id="sparkline-wait-line" d=""></path>
+        </svg>
+      </div>
       <p class="val-sub">Active Registers: <strong id="kpi-registers">2</strong> &bull; Target &lt; 45s</p>
     </div>
 
     <div class="value-item" id="card-hardware">
       <span class="val-num">04 &mdash; CLOSED-LOOP HARDWARE ACTUATOR</span>
-      <div class="val-big-row">
-        <span class="val-chip led-off" id="hw-strobe-val">STROBE: OFF</span>
-        <span class="val-chip buzzer-off" id="hw-buzzer-val">BUZZER: SILENT</span>
+      <div class="val-big-row hw-actuator-row">
+        <div class="beacon-visual" id="beacon-indicator" title="ESP32 Real-Time Physical Actuator">
+          <div class="beacon-pulse-ring ring-2"></div>
+          <div class="beacon-pulse-ring ring-1"></div>
+          <div class="beacon-core"></div>
+        </div>
+        <div class="hw-chips-col">
+          <span class="val-chip led-off" id="hw-strobe-val"><span class="chip-dot"></span> STROBE: OFF</span>
+          <span class="val-chip buzzer-off" id="hw-buzzer-val"><span class="chip-dot"></span> BUZZER: SILENT</span>
+        </div>
       </div>
       <p class="val-sub">ESP32 Heap: <code id="hw-heap">294,816 B</code> &bull; UART Linked</p>
     </div>
@@ -179,6 +213,34 @@
       <p class="desc-muted">From plain-English requirement to TensorRT compiled DeepStream execution.</p>
     </div>
 
+    <!-- Interactive Visual Stepper -->
+    <div class="stages-flow-stepper">
+      <div class="stepper-step active" data-step="stage-1">
+        <div class="stepper-node"><span class="node-dot"></span></div>
+        <span class="stepper-label">1. Requirement</span>
+      </div>
+      <div class="stepper-connector"><div class="connector-glow-packet"></div></div>
+      <div class="stepper-step" data-step="stage-2">
+        <div class="stepper-node"><span class="node-dot"></span></div>
+        <span class="stepper-label">2. Pipeline IR</span>
+      </div>
+      <div class="stepper-connector"><div class="connector-glow-packet"></div></div>
+      <div class="stepper-step" data-step="stage-3">
+        <div class="stepper-node"><span class="node-dot"></span></div>
+        <span class="stepper-label">3. Model GIE</span>
+      </div>
+      <div class="stepper-connector"><div class="connector-glow-packet"></div></div>
+      <div class="stepper-step" data-step="stage-4">
+        <div class="stepper-node"><span class="node-dot"></span></div>
+        <span class="stepper-label">4. Compiler</span>
+      </div>
+      <div class="stepper-connector"><div class="connector-glow-packet"></div></div>
+      <div class="stepper-step" data-step="stage-5">
+        <div class="stepper-node"><span class="node-dot"></span></div>
+        <span class="stepper-label">5. TensorRT</span>
+      </div>
+    </div>
+
     <div class="stages-tab-bar">
       <button class="stage-pill active" data-stage="stage-1">1. Requirement</button>
       <button class="stage-pill" data-stage="stage-2">2. Pipeline IR</button>
@@ -188,6 +250,12 @@
     </div>
 
     <div class="stage-card-frame">
+      <div class="stage-frame-header">
+        <span class="frame-tag" id="stage-frame-tag">STAGE 1 // REQUIREMENT SPECIFICATION</span>
+        <button class="btn-copy-code" id="btn-copy-stage-code" title="Copy code to clipboard">
+          📋 Copy Code
+        </button>
+      </div>
       <div class="stage-code-box" id="stage-display">
         <!-- Rendered dynamically -->
       </div>

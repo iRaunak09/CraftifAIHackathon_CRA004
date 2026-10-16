@@ -246,22 +246,67 @@ pipegen compile \\
 `
   };
 
+  const stageTitles = {
+    "stage-1": "STAGE 1 // REQUIREMENT SPECIFICATION (PRD-RETAIL-001)",
+    "stage-2": "STAGE 2 // DEEPSTREAM PIPELINE IR (8-NODE GRAPH)",
+    "stage-3": "STAGE 3 // MODEL SELECTION & NVINFER GIE CONFIG",
+    "stage-4": "STAGE 4 // AUTOMATED COMPILER & TENSORRT PACKAGING",
+    "stage-5": "STAGE 5 // QUANTITATIVE SPEED & JETSON BENCHMARK REPORT"
+  };
+
   // Switch Subtabs for PipeGen Stages
   function renderStage(stageId) {
     activeStage = stageId;
     const stageDisplay = document.getElementById("stage-display");
+    const frameTag = document.getElementById("stage-frame-tag");
     if (stageDisplay && stageData[stageId]) {
       stageDisplay.innerHTML = stageData[stageId];
     }
+    if (frameTag && stageTitles[stageId]) {
+      frameTag.textContent = stageTitles[stageId];
+    }
+    // Sync stepper steps and pills
+    document.querySelectorAll(".stepper-step").forEach(s => {
+      s.classList.toggle("active", s.getAttribute("data-step") === stageId);
+    });
+    document.querySelectorAll(".stage-pill").forEach(p => {
+      p.classList.toggle("active", p.getAttribute("data-stage") === stageId);
+    });
   }
 
   document.querySelectorAll(".stage-pill, .sub-btn, .subtab-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".stage-pill, .sub-btn, .subtab-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
       renderStage(btn.getAttribute("data-stage"));
     });
   });
+
+  document.querySelectorAll(".stepper-step").forEach(step => {
+    step.addEventListener("click", () => {
+      const stage = step.getAttribute("data-step");
+      if (stage) renderStage(stage);
+    });
+  });
+
+  const btnCopyCode = document.getElementById("btn-copy-stage-code");
+  if (btnCopyCode) {
+    btnCopyCode.addEventListener("click", () => {
+      const stageDisplay = document.getElementById("stage-display");
+      if (stageDisplay) {
+        const textToCopy = stageDisplay.innerText;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          btnCopyCode.textContent = "Copied! ✓";
+          btnCopyCode.classList.add("copied");
+          setTimeout(() => {
+            btnCopyCode.textContent = "📋 Copy Code";
+            btnCopyCode.classList.remove("copied");
+          }, 2000);
+        }).catch(() => {
+          btnCopyCode.textContent = "Copied! ✓";
+          setTimeout(() => { btnCopyCode.textContent = "📋 Copy Code"; }, 2000);
+        });
+      }
+    });
+  }
 
   // Active Navigation Link Handling & Scroll Spy
   document.querySelectorAll(".nav-item").forEach(link => {
@@ -349,8 +394,32 @@ pipegen compile \\
     });
   }
 
+  let animTick = 0;
+  const occupancyHistory = [22, 23, 24, 25, 24, 23, 24, 25, 26, 24, 25];
+  const waitTimeHistory = [32, 33, 31, 34, 33, 32, 35, 33, 34, 32, 33];
+
+  function renderSparkline(lineId, areaId, data, minVal, maxVal, width = 160, height = 28) {
+    const lineEl = document.getElementById(lineId);
+    const areaEl = document.getElementById(areaId);
+    if (!lineEl || !areaEl || data.length < 2) return;
+
+    const span = Math.max(1, maxVal - minVal);
+    const stepX = width / (data.length - 1);
+
+    const pts = data.map((val, idx) => {
+      const x = idx * stepX;
+      const normalized = Math.max(0, Math.min(1, (val - minVal) / span));
+      const y = height - (normalized * (height - 6) + 3);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    });
+
+    lineEl.setAttribute("d", "M " + pts.join(" L "));
+    areaEl.setAttribute("d", `M 0,${height} L ` + pts.join(" L ") + ` L ${width},${height} Z`);
+  }
+
   // Canvas Drawing Routine
   function drawStoreMap() {
+    animTick += 0.05;
     ctx.fillStyle = "#07080B";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -418,9 +487,36 @@ pipegen compile \\
       ctx.stroke();
     }
 
+    // High-Tech Cybernetic Canvas HUD Header
+    ctx.fillStyle = "rgba(10, 11, 14, 0.85)";
+    ctx.fillRect(16, 14, 430, 32);
+    ctx.strokeStyle = "rgba(198, 248, 6, 0.3)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(16, 14, 430, 32);
+    ctx.fillStyle = "#C6F806";
+    ctx.beginPath();
+    ctx.arc(32, 30, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "bold 11px 'JetBrains Mono', monospace";
+    ctx.fillText("CAM-01: OVERHEAD STORE SENTINEL", 44, 34);
+    ctx.fillStyle = "#848E9F";
+    ctx.font = "10px 'JetBrains Mono', monospace";
+    ctx.fillText("NVDEC • 60 FPS • TRT FP16", 265, 34);
+
+    // Timestamp & Model Watermark (Top Right)
+    ctx.fillStyle = "rgba(10, 11, 14, 0.85)";
+    ctx.fillRect(canvas.width - 240, 14, 224, 32);
+    ctx.strokeStyle = "rgba(36, 107, 253, 0.3)";
+    ctx.strokeRect(canvas.width - 240, 14, 224, 32);
+    ctx.fillStyle = "#246BFD";
+    ctx.font = "bold 10px 'JetBrains Mono', monospace";
+    const timeStr = new Date().toLocaleTimeString();
+    ctx.fillText(`REC // ${timeStr} • YOLOv8x`, canvas.width - 228, 34);
+
     if (chkZones && chkZones.checked) {
       // 1. Promotional Aisle Area (Subtle Glow Overlay)
-      ctx.fillStyle = "rgba(36, 107, 253, 0.1)";
+      ctx.fillStyle = "rgba(36, 107, 253, 0.08)";
       ctx.strokeStyle = "#246BFD";
       ctx.lineWidth = 2;
       ctx.fillRect(100, 150, 420, 320);
@@ -432,66 +528,100 @@ pipegen compile \\
       // Shelves inside aisle
       ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
       ctx.strokeStyle = "rgba(132, 142, 159, 0.25)";
-      ctx.fillRect(130, 210, 160, 35);
-      ctx.strokeRect(130, 210, 160, 35);
-      ctx.fillRect(330, 210, 160, 35);
-      ctx.strokeRect(330, 210, 160, 35);
-      ctx.fillRect(130, 300, 160, 35);
-      ctx.strokeRect(130, 300, 160, 35);
-      ctx.fillRect(330, 300, 160, 35);
-      ctx.strokeRect(330, 300, 160, 35);
-      ctx.fillRect(130, 390, 160, 35);
-      ctx.strokeRect(130, 390, 160, 35);
-      ctx.fillRect(330, 390, 160, 35);
-      ctx.strokeRect(330, 390, 160, 35);
+      for (let sy = 210; sy <= 390; sy += 90) {
+        ctx.fillRect(130, sy, 160, 35);
+        ctx.strokeRect(130, sy, 160, 35);
+        ctx.fillRect(330, sy, 160, 35);
+        ctx.strokeRect(330, sy, 160, 35);
+      }
 
       // 2. Checkout Queue Polygon Area (Electric Neon Lime #C6F806 / Alert #FF2A55)
       const isQueueAlert = dashboardState && dashboardState.metrics && dashboardState.metrics.queue_alert_active;
+      const qCount = dashboardState && dashboardState.metrics ? dashboardState.metrics.queue_count : 0;
+      
       ctx.fillStyle = isQueueAlert ? "rgba(255, 42, 85, 0.22)" : "rgba(198, 248, 6, 0.12)";
       ctx.strokeStyle = isQueueAlert ? "#FF2A55" : "#C6F806";
       ctx.lineWidth = isQueueAlert ? 3 : 2;
       ctx.fillRect(630, 240, 520, 320);
       ctx.strokeRect(630, 240, 520, 320);
 
+      // Subtle dynamic diagonal scan hatch lines inside queue box
+      ctx.save();
+      ctx.strokeStyle = isQueueAlert ? "rgba(255, 42, 85, 0.15)" : "rgba(198, 248, 6, 0.08)";
+      ctx.lineWidth = 1;
+      const hatchOffset = (animTick * 12) % 24;
+      for (let hx = 630 - 320 + hatchOffset; hx < 1150; hx += 24) {
+        ctx.beginPath();
+        ctx.moveTo(hx, 240);
+        ctx.lineTo(hx + 320, 560);
+        ctx.stroke();
+      }
+      ctx.restore();
+
       // Cashier Counter Blocks
       ctx.fillStyle = "#12151C";
       ctx.strokeStyle = "#1E232F";
-      ctx.fillRect(1020, 270, 90, 40);
-      ctx.strokeRect(1020, 270, 90, 40);
-      ctx.fillRect(1020, 380, 90, 40);
-      ctx.strokeRect(1020, 380, 90, 40);
-      ctx.fillRect(1020, 490, 90, 40);
-      ctx.strokeRect(1020, 490, 90, 40);
+      [270, 380, 490].forEach((ry, idx) => {
+        ctx.fillRect(1020, ry, 90, 40);
+        ctx.strokeRect(1020, ry, 90, 40);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "10px 'JetBrains Mono', monospace";
+        ctx.fillText(`REGISTER ${idx + 1}`, 1030, ry + 25);
+        ctx.fillStyle = "#12151C";
+      });
 
-      ctx.fillStyle = "#FFFFFF";
-      ctx.font = "10px 'JetBrains Mono', monospace";
-      ctx.fillText("REGISTER 1", 1030, 295);
-      ctx.fillText("REGISTER 2", 1030, 405);
-      ctx.fillText("REGISTER 3", 1030, 515);
-
+      // Status Tag
       ctx.fillStyle = isQueueAlert ? "#FF2A55" : "#C6F806";
       ctx.font = "bold 13px 'Plus Jakarta Sans', sans-serif";
-      const qCount = dashboardState && dashboardState.metrics ? dashboardState.metrics.queue_count : 0;
-      ctx.fillText(`CHECKOUT QUEUE ROI (${qCount} Waiting)`, 650, 270);
+      const queueTitle = isQueueAlert 
+        ? `🚨 CHECKOUT QUEUE OVERFLOW (${qCount} Waiting • SLA Exceeded)`
+        : `CHECKOUT QUEUE ROI (${qCount} Waiting • Nominal Flow)`;
+      ctx.fillText(queueTitle, 650, 270);
     }
 
-    // 3. Entrance & Exit Tripwires (Electric Blue)
+    // 3. Entrance & Exit Tripwires (Bi-directional animated chevrons)
     if (chkTripwire && chkTripwire.checked) {
-      ctx.strokeStyle = "#246BFD";
+      const tripwireY = 630;
+      
+      // Left Segment: Entrance [IN] (Neon Volt / Lime)
+      ctx.strokeStyle = "#C6F806";
       ctx.lineWidth = 3;
       ctx.setLineDash([8, 6]);
       ctx.beginPath();
-      ctx.moveTo(80, 630);
-      ctx.lineTo(600, 630);
+      ctx.moveTo(80, tripwireY);
+      ctx.lineTo(330, tripwireY);
+      ctx.stroke();
+
+      // Animated UP Chevrons for Entrance [IN]
+      const inArrowShift = (animTick * 10) % 30;
+      ctx.fillStyle = "#C6F806";
+      ctx.font = "bold 10px 'JetBrains Mono', monospace";
+      for (let ax = 100; ax < 320; ax += 45) {
+        const arrowY = tripwireY - 8 - ((inArrowShift + ax) % 18);
+        ctx.fillText("▲", ax, arrowY);
+      }
+      ctx.fillText("ENTRANCE [IN] TRIPWIRE", 90, tripwireY + 18);
+
+      // Right Segment: Exit [OUT] (Electric Blue)
+      ctx.strokeStyle = "#246BFD";
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath();
+      ctx.moveTo(350, tripwireY);
+      ctx.lineTo(600, tripwireY);
       ctx.stroke();
       ctx.setLineDash([]);
 
+      // Animated DOWN Chevrons for Exit [OUT]
+      const outArrowShift = (animTick * 10) % 30;
       ctx.fillStyle = "#246BFD";
-      ctx.font = "bold 12px 'Plus Jakarta Sans', sans-serif";
-      ctx.fillText("ENTRANCE & EXIT TRIPWIRE LINE Crossing [IN / OUT]", 90, 620);
+      for (let bx = 370; bx < 590; bx += 45) {
+        const arrowY = tripwireY + 12 + ((outArrowShift + bx) % 18);
+        ctx.fillText("▼", bx, arrowY);
+      }
+      ctx.fillText("EXIT [OUT] TRIPWIRE", 370, tripwireY - 8);
     }
 
-    // 4. Render Active Tracked Customers (Electric Blue boxes & paths, Lime in queue)
+    // 4. Render Active Tracked Customers with Cybernetic Reticles
     if (dashboardState && dashboardState.tracks) {
       const scaleX = canvas.width / 1920;
       const scaleY = canvas.height / 1080;
@@ -501,15 +631,15 @@ pipegen compile \\
         const cy = c.y * scaleY * 1.35;
         const customerColor = c.in_queue ? "#C6F806" : "#246BFD";
 
-        // Motion Trail / Tracking Paths
+        // Motion Trail / Particle Tracking Paths
         if (chkTrails && chkTrails.checked && c.trail && c.trail.length > 1) {
           ctx.strokeStyle = customerColor;
-          ctx.lineWidth = 1.5;
-          ctx.globalAlpha = 0.5;
+          ctx.lineWidth = 2;
           ctx.beginPath();
           c.trail.forEach((p, idx) => {
             const px = p[0] * scaleX * 1.5;
             const py = p[1] * scaleY * 1.35;
+            ctx.globalAlpha = Math.min(0.6, (idx / c.trail.length) * 0.7);
             if (idx === 0) ctx.moveTo(px, py);
             else ctx.lineTo(px, py);
           });
@@ -517,31 +647,55 @@ pipegen compile \\
           ctx.globalAlpha = 1.0;
         }
 
-        // Bounding Box
+        // Bounding Box Dimensions
         const bw = 24;
         const bh = 48;
-        ctx.strokeStyle = customerColor;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(cx - bw / 2, cy - bh / 2, bw, bh);
+        const bx = cx - bw / 2;
+        const by = cy - bh / 2;
 
-        // Bounding Box Glow
+        // Bounding Box Semi-transparent Glow
         ctx.fillStyle = customerColor;
-        ctx.globalAlpha = 0.18;
-        ctx.fillRect(cx - bw / 2, cy - bh / 2, bw, bh);
+        ctx.globalAlpha = 0.16;
+        ctx.fillRect(bx, by, bw, bh);
         ctx.globalAlpha = 1.0;
 
-        // Tag label
-        ctx.fillStyle = "#0A0B0E";
-        ctx.fillRect(cx - bw / 2, cy - bh / 2 - 16, bw + 24, 14);
+        // Cybernetic Corner Reticles on Bounding Box
+        ctx.strokeStyle = customerColor;
+        ctx.lineWidth = 2;
+        const rLen = 6;
+        // Top-left
+        ctx.beginPath();
+        ctx.moveTo(bx, by + rLen); ctx.lineTo(bx, by); ctx.lineTo(bx + rLen, by);
+        // Top-right
+        ctx.moveTo(bx + bw - rLen, by); ctx.lineTo(bx + bw, by); ctx.lineTo(bx + bw, by + rLen);
+        // Bottom-left
+        ctx.moveTo(bx, by + bh - rLen); ctx.lineTo(bx, by + bh); ctx.lineTo(bx + rLen, by + bh);
+        // Bottom-right
+        ctx.moveTo(bx + bw - rLen, by + bh); ctx.lineTo(bx + bw, by + bh); ctx.lineTo(bx + bw, by + bh - rLen);
+        ctx.stroke();
+
+        // Center crosshair dot
         ctx.fillStyle = customerColor;
-        ctx.font = "9px 'JetBrains Mono', monospace";
-        ctx.fillText(`ID:${c.id}`, cx - bw / 2 + 2, cy - bh / 2 - 5);
+        ctx.beginPath();
+        ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Tag label pill
+        ctx.fillStyle = "#0A0B0E";
+        ctx.fillRect(bx, by - 16, bw + 28, 14);
+        ctx.strokeStyle = customerColor;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(bx, by - 16, bw + 28, 14);
+
+        ctx.fillStyle = customerColor;
+        ctx.font = "bold 9px 'JetBrains Mono', monospace";
+        ctx.fillText(`ID:${c.id}`, bx + 3, by - 6);
 
         // Dwell Timer if in queue
         if (c.in_queue) {
           ctx.fillStyle = "#C6F806";
           ctx.font = "bold 9px 'JetBrains Mono', monospace";
-          ctx.fillText(`${Math.round(c.dwell_time)}s`, cx - bw / 2 + 2, cy + bh / 2 + 11);
+          ctx.fillText(`${Math.round(c.dwell_time)}s`, bx + 2, by + bh + 11);
         }
       });
     }
@@ -581,6 +735,28 @@ pipegen compile \\
 
     kpiQueue.textContent = m.queue_count;
     kpiWaitTime.textContent = m.avg_wait_time_sec.toFixed(1);
+
+    // Live Rolling History & Sparkline Rendering
+    occupancyHistory.push(m.current_occupancy);
+    if (occupancyHistory.length > 20) occupancyHistory.shift();
+    renderSparkline("sparkline-occupancy-line", "sparkline-occupancy-area", occupancyHistory, 0, 60);
+
+    waitTimeHistory.push(m.avg_wait_time_sec);
+    if (waitTimeHistory.length > 20) waitTimeHistory.shift();
+    renderSparkline("sparkline-wait-line", "sparkline-wait-area", waitTimeHistory, 10, 80);
+
+    // Live Queue Density Equalizer Bars
+    const densityBars = document.querySelectorAll("#queue-density-meter .meter-bar");
+    const activeBarCount = Math.min(densityBars.length, Math.max(1, m.queue_count));
+    densityBars.forEach((bar, idx) => {
+      bar.classList.toggle("active", idx < activeBarCount);
+    });
+
+    // Live Hardware Beacon Indicator
+    const beaconEl = document.getElementById("beacon-indicator");
+    if (beaconEl) {
+      beaconEl.classList.toggle("beacon-alert", !!m.queue_alert_active);
+    }
 
     // Live Hardware Telemetry in Deployment Metrics Card
     const tableLatency = document.getElementById("table-live-latency");
@@ -631,18 +807,18 @@ pipegen compile \\
 
     if (telemetryState.led_status && telemetryState.led_status.includes("RED")) {
       hwStrobeVal.className = "val-chip led-strobe";
-      hwStrobeVal.textContent = "STROBE";
+      hwStrobeVal.innerHTML = '<span class="chip-dot"></span> STROBE: FLASHING 🚨';
     } else {
       hwStrobeVal.className = "val-chip led-off";
-      hwStrobeVal.textContent = "OFF";
+      hwStrobeVal.innerHTML = '<span class="chip-dot"></span> STROBE: OFF';
     }
 
     if (telemetryState.buzzer_active) {
       hwBuzzerVal.className = "val-chip buzzer-on";
-      hwBuzzerVal.textContent = "900 Hz";
+      hwBuzzerVal.innerHTML = '<span class="chip-dot"></span> BUZZER: 2.4kHz PWM 🔊';
     } else {
       hwBuzzerVal.className = "val-chip buzzer-off";
-      hwBuzzerVal.textContent = "SILENT";
+      hwBuzzerVal.innerHTML = '<span class="chip-dot"></span> BUZZER: SILENT';
     }
 
     if (hwHeap) hwHeap.textContent = telemetryState.free_heap_bytes ? `${telemetryState.free_heap_bytes.toLocaleString()} B` : "294,816 B";
