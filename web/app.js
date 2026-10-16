@@ -1024,16 +1024,18 @@ pipegen compile \\
         ctx.arc(cx, cy, 2, 0, Math.PI * 2);
         ctx.fill();
 
-        // Tag label pill
+        // Tag label pill (PDF Section 3: PERSON 01 — 96%)
+        const pillW = 94;
         ctx.fillStyle = "#0A0B0E";
-        ctx.fillRect(bx, by - 16, bw + 28, 14);
+        ctx.fillRect(bx, by - 16, pillW, 14);
         ctx.strokeStyle = customerColor;
         ctx.lineWidth = 1;
-        ctx.strokeRect(bx, by - 16, bw + 28, 14);
+        ctx.strokeRect(bx, by - 16, pillW, 14);
 
         ctx.fillStyle = customerColor;
         ctx.font = "bold 9px 'JetBrains Mono', monospace";
-        ctx.fillText(`ID:${c.id}`, bx + 3, by - 6);
+        const personIdStr = String(c.id).padStart(2, "0");
+        ctx.fillText(`PERSON ${personIdStr} — 96%`, bx + 4, by - 6);
 
         // Dwell Timer if in queue
         if (c.in_queue) {
@@ -1358,9 +1360,305 @@ pipegen compile \\
     });
   }
 
-  // Animation Loop
+  // ============================================================================
+  // Tab Visibility State (PDF Section 8 & Rule 3: Stop decorative animations when hidden)
+  // ============================================================================
+  let isTabVisible = !document.hidden;
+  document.addEventListener("visibilitychange", () => {
+    isTabVisible = !document.hidden;
+  });
+
+  // ============================================================================
+  // PDF Section 1 (Animation B): 3D AI Perception Object with Three.js
+  // ============================================================================
+  function initHero3DPerceptionObject() {
+    const container = document.getElementById("hero-3d-sensor");
+    if (!container || typeof THREE === "undefined") return;
+
+    const width = container.clientWidth || 92;
+    const height = container.clientHeight || 92;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+    camera.position.z = 4.8;
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.innerHTML = "";
+    container.appendChild(renderer.domElement);
+
+    // Root Group
+    const rootGroup = new THREE.Group();
+    scene.add(rootGroup);
+
+    // 1. Core Metallic/Dark Glass Sphere
+    const coreGeo = new THREE.SphereGeometry(1.2, 24, 24);
+    const coreMat = new THREE.MeshStandardMaterial({
+      color: 0x0c1018,
+      roughness: 0.25,
+      metalness: 0.85,
+    });
+    const coreSphere = new THREE.Mesh(coreGeo, coreMat);
+    rootGroup.add(coreSphere);
+
+    // 2. Electric-Blue Wireframe Geometry Cage
+    const wireGeo = new THREE.IcosahedronGeometry(1.28, 2);
+    const wireMat = new THREE.MeshBasicMaterial({
+      color: 0x246BFD,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.65,
+    });
+    const wireMesh = new THREE.Mesh(wireGeo, wireMat);
+    rootGroup.add(wireMesh);
+
+    // 3. Signal Lime Scanning Ring
+    const ringGeo = new THREE.TorusGeometry(1.62, 0.035, 12, 48);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0xC6F806,
+      transparent: true,
+      opacity: 0.9,
+    });
+    const scanRing = new THREE.Mesh(ringGeo, ringMat);
+    scanRing.rotation.x = Math.PI / 3;
+    rootGroup.add(scanRing);
+
+    // 4. Floating Detection Markers (4 Satellite Nodes)
+    const markerGeo = new THREE.OctahedronGeometry(0.12);
+    const markerMat = new THREE.MeshBasicMaterial({ color: 0xC6F806 });
+    const markers = [];
+    for (let i = 0; i < 4; i++) {
+      const marker = new THREE.Mesh(markerGeo, markerMat);
+      rootGroup.add(marker);
+      markers.push({
+        mesh: marker,
+        angle: (i * Math.PI) / 2,
+        dist: 1.9,
+        speed: 0.02 + i * 0.005,
+      });
+    }
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0x18243c, 1.8);
+    scene.add(ambientLight);
+
+    const blueLight = new THREE.PointLight(0x246BFD, 3.5, 12);
+    blueLight.position.set(3, 3, 3);
+    scene.add(blueLight);
+
+    const limeLight = new THREE.PointLight(0xC6F806, 2.2, 12);
+    limeLight.position.set(-3, -2, 2);
+    scene.add(limeLight);
+
+    // Pointer-reactive subtle rotation
+    let targetRotX = 0;
+    let targetRotY = 0;
+
+    window.addEventListener("mousemove", (e) => {
+      const nx = (e.clientX / window.innerWidth) * 2 - 1;
+      const ny = -(e.clientY / window.innerHeight) * 2 + 1;
+      targetRotY = nx * 0.45;
+      targetRotX = -ny * 0.45;
+    });
+
+    let ringOsc = 0;
+    function animate3D() {
+      if (!isTabVisible) {
+        requestAnimationFrame(animate3D);
+        return;
+      }
+      ringOsc += 0.04;
+
+      // Subtle base rotation + mouse lerp
+      rootGroup.rotation.y += 0.008;
+      rootGroup.rotation.y += (targetRotY - rootGroup.rotation.y) * 0.06;
+      rootGroup.rotation.x += (targetRotX - rootGroup.rotation.x) * 0.06;
+
+      // Scan ring tilt & oscillation
+      scanRing.rotation.z += 0.015;
+      scanRing.position.y = Math.sin(ringOsc) * 0.18;
+
+      // Floating markers orbit
+      markers.forEach((m) => {
+        m.angle += m.speed;
+        m.mesh.position.x = Math.cos(m.angle) * m.dist;
+        m.mesh.position.z = Math.sin(m.angle) * m.dist;
+        m.mesh.position.y = Math.sin(m.angle * 2) * 0.4;
+        m.mesh.rotation.y += 0.05;
+      });
+
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate3D);
+    }
+
+    requestAnimationFrame(animate3D);
+
+    // Handle container resize
+    window.addEventListener("resize", () => {
+      const nw = container.clientWidth || 92;
+      const nh = container.clientHeight || 92;
+      camera.aspect = nw / nh;
+      camera.updateProjectionMatrix();
+      renderer.setSize(nw, nh);
+    });
+  }
+
+  // ============================================================================
+  // PDF Section 4: Closed-Loop Physical AI Hardware Flow
+  // Camera -> AI Inference -> ESP32 -> Physical Response
+  // ============================================================================
+  let isHardwareFlowRunning = false;
+  function triggerHardwareFlow(reason = "MANUAL_TEST") {
+    if (isHardwareFlowRunning) return;
+    isHardwareFlowRunning = true;
+
+    const nodeCam = document.getElementById("hw-node-camera");
+    const nodeAi = document.getElementById("hw-node-ai");
+    const nodeEsp = document.getElementById("hw-node-esp32");
+    const nodeAct = document.getElementById("hw-node-actuator");
+
+    const pulse1 = document.querySelector(".pulse-1");
+    const pulse2 = document.querySelector(".pulse-2");
+    const pulse3 = document.querySelector(".pulse-3");
+
+    const indCam = document.getElementById("ind-camera");
+    const indAi = document.getElementById("ind-ai");
+    const indEsp = document.getElementById("ind-esp32");
+    const indAct = document.getElementById("ind-actuator");
+    const flowStatus = document.getElementById("hw-flow-status-text");
+
+    // Reset all
+    [nodeCam, nodeAi, nodeEsp, nodeAct].forEach((n) => n && n.classList.remove("pulse-glow"));
+    [pulse1, pulse2, pulse3].forEach((p) => p && p.classList.remove("traveling"));
+
+    // Step 1: Camera Node Activates
+    if (nodeCam) nodeCam.classList.add("pulse-glow");
+    if (indCam) indCam.textContent = "TARGET DETECTED";
+    if (flowStatus) flowStatus.textContent = "Step 1/4: 4K Camera acquired shopper crossing checkout ROI.";
+
+    // Step 2: Pulse 1 to Jetson
+    setTimeout(() => {
+      if (pulse1) pulse1.classList.add("traveling");
+    }, 250);
+
+    // Step 3: Jetson AI Inference Lights Up
+    setTimeout(() => {
+      if (nodeCam) nodeCam.classList.remove("pulse-glow");
+      if (indCam) indCam.textContent = "STREAMING";
+      if (nodeAi) nodeAi.classList.add("pulse-glow");
+      if (indAi) indAi.textContent = "QUEUE DENSITY > 4";
+      if (flowStatus) flowStatus.textContent = "Step 2/4: Jetson Orin TensorRT evaluated queue surge in 4.88ms.";
+    }, 900);
+
+    // Step 4: Pulse 2 to ESP32
+    setTimeout(() => {
+      if (pulse2) pulse2.classList.add("traveling");
+    }, 1150);
+
+    // Step 5: ESP32-S3 RTOS Lights Up
+    setTimeout(() => {
+      if (nodeAi) nodeAi.classList.remove("pulse-glow");
+      if (indAi) indAi.textContent = "4.88 ms FP16";
+      if (nodeEsp) nodeEsp.classList.add("pulse-glow");
+      if (indEsp) indEsp.textContent = "UART DISPATCH";
+      if (flowStatus) flowStatus.textContent = "Step 3/4: ESP32-S3 received event packet via UART & asserted GPIO 18/19.";
+    }, 1800);
+
+    // Step 6: Pulse 3 to Actuator
+    setTimeout(() => {
+      if (pulse3) pulse3.classList.add("traveling");
+    }, 2050);
+
+    // Step 7: Physical Actuator Lights Up (Strobe / Alarm)
+    setTimeout(() => {
+      if (nodeEsp) nodeEsp.classList.remove("pulse-glow");
+      if (indEsp) indEsp.textContent = "LINKED";
+      if (nodeAct) nodeAct.classList.add("pulse-glow");
+      if (indAct) indAct.textContent = "ACTUATED (STROBE ON)";
+      if (flowStatus) flowStatus.textContent = "Step 4/4: Physical cashier beacon strobed & auxiliary register opened!";
+      
+      const beaconEl = document.getElementById("beacon-indicator");
+      if (beaconEl) beaconEl.classList.add("beacon-alert");
+    }, 2700);
+
+    // Step 8: Return to Normal Steady State
+    setTimeout(() => {
+      if (nodeAct) nodeAct.classList.remove("pulse-glow");
+      if (indAct) indAct.textContent = "ARMED";
+      if (flowStatus) flowStatus.textContent = "System Nominal. Closed-loop UART bridge active.";
+      [pulse1, pulse2, pulse3].forEach((p) => p && p.classList.remove("traveling"));
+      isHardwareFlowRunning = false;
+    }, 4800);
+  }
+
+  // Hook button trigger
+  const btnTriggerFlow = document.getElementById("btn-trigger-hardware-flow");
+  if (btnTriggerFlow) {
+    btnTriggerFlow.addEventListener("click", () => triggerHardwareFlow("USER_CLICK"));
+  }
+
+  // ============================================================================
+  // PDF Section 5: Analytics Value CountUp Animation
+  // ============================================================================
+  let hasCountedUp = false;
+  function initCountUpAnimations() {
+    const valueStrip = document.querySelector(".value-strip");
+    if (!valueStrip || !("IntersectionObserver" in window)) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasCountedUp) {
+            hasCountedUp = true;
+            animateNumber(kpiOccupancy, 0, parseInt(kpiOccupancy.textContent) || 24, 1200);
+            animateNumber(kpiIn, 0, parseInt(kpiIn.textContent) || 142, 1400);
+            animateNumber(kpiOut, 0, parseInt(kpiOut.textContent) || 118, 1400);
+            animateNumber(kpiQueue, 0, parseInt(kpiQueue.textContent) || 3, 1000);
+            animateDecimal(kpiWaitTime, 0, parseFloat(kpiWaitTime.textContent) || 33.0, 1300);
+          }
+        });
+      },
+      { threshold: 0.25 }
+    );
+    observer.observe(valueStrip);
+  }
+
+  function animateNumber(element, start, end, duration) {
+    if (!element) return;
+    const startTime = performance.now();
+    function tick(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(start + (end - start) * ease);
+      element.textContent = current;
+      if (progress < 1) requestAnimationFrame(tick);
+      else element.textContent = end;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function animateDecimal(element, start, end, duration) {
+    if (!element) return;
+    const startTime = performance.now();
+    function tick(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = (start + (end - start) * ease).toFixed(1);
+      element.textContent = current;
+      if (progress < 1) requestAnimationFrame(tick);
+      else element.textContent = end.toFixed(1);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // Animation Loop (Pauses on inactive tab per Rule 3)
   function loop() {
-    drawStoreMap();
+    if (isTabVisible) {
+      drawStoreMap();
+    }
     requestAnimationFrame(loop);
   }
 
@@ -1368,6 +1666,8 @@ pipegen compile \\
   renderStage("stage-1");
   init3DParticleBackground();
   init3DCardParallax();
+  initHero3DPerceptionObject();
+  initCountUpAnimations();
   setInterval(fetchState, 350);
   setInterval(fetchTelemetry, 600);
   fetchState();

@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
+  <!-- Local Three.js for 3D Perception & Hardware Visualization -->
+  <script src="/three.min.js"></script>
 </head>
 <body class="tech-dark-theme">
   <!-- Interactive 3D Ambient Particle Constellation Canvas -->
@@ -15,7 +17,7 @@
 
   <!-- Main Navigation Bar -->
   <header class="main-nav">
-    <div class="nav-brand-group">
+    <div class="nav-brand-group reveal-logo">
       <div class="brand-logo">OMNI.</div>
       <div class="brand-subtext">
         <span class="brand-sub-title">SENTINEL</span>
@@ -26,7 +28,9 @@
     <nav class="nav-links">
       <a href="#vision" class="nav-item active">Live Vision</a>
       <a href="#stages" class="nav-item">5 Stages</a>
-      <a href="#telemetry" class="nav-item">ESP32 Telemetry</a>
+      <a href="#hardware-flow" class="nav-item">Hardware Flow</a>
+      <a href="#features" class="nav-item">Features</a>
+      <a href="#telemetry" class="nav-item">Telemetry</a>
       <a href="#deployment" class="nav-item">Deployment</a>
     </nav>
 
@@ -39,24 +43,24 @@
 
   <!-- Main Hero Grid -->
   <section class="hero-container" id="vision">
-    <!-- Left Column: Typography & CTAs -->
+    <!-- Left Column: Typography & CTAs (Staggered Text Reveal) -->
     <div class="hero-left">
-      <div class="hero-kicker">
+      <div class="hero-kicker reveal-eyebrow">
         <span class="kicker-dash">&mdash;</span>
         <span class="kicker-label">YOUR PHYSICAL AI QUEUE AUTOPILOT</span>
       </div>
 
-      <h1 class="hero-headline">
+      <h1 class="hero-headline reveal-headline">
         Built for<br>
         the <span class="italic-serif-lime">physical</span><br>
         store<span class="lime-dot">.</span>
       </h1>
 
-      <p class="hero-desc">
+      <p class="hero-desc reveal-desc">
         Edge vision staples, ready for production deployment. Detect customers, track checkout queue dwell times, and actuate IoT cashier beacons—all compiled to TensorRT in one unified pipeline.
       </p>
 
-      <div class="hero-cta-group">
+      <div class="hero-cta-group reveal-cta">
         <button class="btn-lime-pill" id="btn-spike-crowd">
           Spike crowd rush ↗
         </button>
@@ -66,7 +70,7 @@
       </div>
 
       <!-- Trust Badges Strip (3 circles like JS Collections) -->
-      <div class="hero-trust-strip">
+      <div class="hero-trust-strip reveal-cta">
         <div class="trust-avatars">
           <span class="avatar-pill av-1">60</span>
           <span class="avatar-pill av-2">4.8</span>
@@ -79,12 +83,13 @@
       </div>
     </div>
 
-    <!-- Right Column: Striking Royal Blue Feature Block -->
-    <div class="hero-right">
+    <!-- Right Column: Striking Royal Blue Feature Block (Enters from right) -->
+    <div class="hero-right reveal-cockpit">
       <div class="royal-blue-card" id="cockpit-card">
-        <!-- Floating Neon Lime Circular Badge -->
-        <div class="floating-lime-circle" id="circle-badge" title="Live Perception Streaming">
-          <span class="circle-txt">LIVE<br>60 FPS<br>↗</span>
+        <!-- 3D AI Perception Object & Scanning Sphere Widget -->
+        <div class="hero-3d-perception-widget" id="circle-badge" title="Interactive 3D AI Perception Object">
+          <div class="perception-3d-canvas-wrap" id="hero-3d-sensor"></div>
+          <span class="circle-txt">AI CORE<br>60 FPS<br>↗</span>
         </div>
 
         <div class="blue-card-header">
@@ -93,8 +98,8 @@
             <button class="btn-source-toggle" id="btn-toggle-camera" title="Switch between Synthetic Store Tracker and Live USB/Webcam">
               📷 Switch to USB / Live Cam
             </button>
-            <button class="btn-3d-toggle" id="btn-toggle-3d" title="Switch between 2D Overhead Plan and 3D Isometric Digital Twin View">
-              🧊 3D Digital Twin
+            <button class="btn-3d-toggle active" id="btn-toggle-3d" title="Switch between 2D Overhead Plan and 3D Isometric Digital Twin View">
+              📐 2D Overhead
             </button>
           </div>
           <div class="stream-toggles">
@@ -116,6 +121,8 @@
           <div class="hud-corner-reticle reticle-tr"></div>
           <div class="hud-corner-reticle reticle-bl"></div>
           <div class="hud-corner-reticle reticle-br"></div>
+          <!-- Scanning Laser Line (Section 1/3 Animation) -->
+          <div class="laser-scanner-line" id="laser-scanner"></div>
           
           <video id="webcam-feed" playsinline autoplay muted style="display:none;"></video>
           <canvas id="vision-canvas" width="1280" height="720"></canvas>
@@ -267,6 +274,88 @@
     </div>
   </section>
 
+  <!-- Section 4: Physical AI — Perception-to-Action Hardware Flow (PDF Section 4) -->
+  <section class="hardware-flow-section" id="hardware-flow">
+    <div class="section-title-wrap">
+      <span class="sub-label">&mdash; CLOSED-LOOP PHYSICAL AI SYSTEM</span>
+      <h2 class="title-bold">Perception-to-Action Hardware Flow.</h2>
+      <p class="desc-muted">Camera &rarr; AI Inference &rarr; ESP32 RTOS &rarr; Physical Response. Watch signal pulses actuate IoT hardware in real time.</p>
+    </div>
+
+    <div class="hardware-flow-stage">
+      <!-- 4 Connected System Nodes -->
+      <div class="hw-node-card active" id="hw-node-camera">
+        <div class="node-icon-box">📹</div>
+        <div class="node-meta">
+          <span class="node-step">NODE 01</span>
+          <h4>4K Camera Sensor</h4>
+          <p>Overhead RGB Stream (60 FPS)</p>
+        </div>
+        <div class="node-indicator" id="ind-camera">STREAMING</div>
+      </div>
+
+      <div class="hw-pulse-connector">
+        <svg class="circuit-wire-svg" viewBox="0 0 80 24">
+          <line x1="0" y1="12" x2="80" y2="12" class="circuit-base-line" />
+          <circle cx="40" cy="12" r="4" class="circuit-pulse-packet pulse-1" />
+        </svg>
+      </div>
+
+      <div class="hw-node-card" id="hw-node-ai">
+        <div class="node-icon-box">🧠</div>
+        <div class="node-meta">
+          <span class="node-step">NODE 02</span>
+          <h4>NVIDIA Jetson Orin</h4>
+          <p>YOLOv8x + NvDCF TensorRT</p>
+        </div>
+        <div class="node-indicator" id="ind-ai">4.88 ms FP16</div>
+      </div>
+
+      <div class="hw-pulse-connector">
+        <svg class="circuit-wire-svg" viewBox="0 0 80 24">
+          <line x1="0" y1="12" x2="80" y2="12" class="circuit-base-line" />
+          <circle cx="40" cy="12" r="4" class="circuit-pulse-packet pulse-2" />
+        </svg>
+      </div>
+
+      <div class="hw-node-card" id="hw-node-esp32">
+        <div class="node-icon-box">⚡</div>
+        <div class="node-meta">
+          <span class="node-step">NODE 03</span>
+          <h4>ESP32-S3 RTOS</h4>
+          <p>UART / MQTT Event Broker</p>
+        </div>
+        <div class="node-indicator" id="ind-esp32">LINKED</div>
+      </div>
+
+      <div class="hw-pulse-connector">
+        <svg class="circuit-wire-svg" viewBox="0 0 80 24">
+          <line x1="0" y1="12" x2="80" y2="12" class="circuit-base-line" />
+          <circle cx="40" cy="12" r="4" class="circuit-pulse-packet pulse-3" />
+        </svg>
+      </div>
+
+      <div class="hw-node-card" id="hw-node-actuator">
+        <div class="node-icon-box" id="hw-beacon-icon">🚨</div>
+        <div class="node-meta">
+          <span class="node-step">NODE 04</span>
+          <h4>Physical Actuator</h4>
+          <p>GPIO 18 Strobe &bull; GPIO 19 Buzzer</p>
+        </div>
+        <div class="node-indicator" id="ind-actuator">ARMED</div>
+      </div>
+    </div>
+
+    <div class="hw-flow-action-row">
+      <button class="btn-lime-pill" id="btn-trigger-hardware-flow">
+        ⚡ Simulate Perception &rarr; Action Pulse ↗
+      </button>
+      <span class="hw-flow-status" id="hw-flow-status-text">
+        System Nominal. Closed-loop UART bridge active.
+      </span>
+    </div>
+  </section>
+
   <!-- Live Telemetry & Events Grid -->
   <section class="telemetry-showcase" id="telemetry">
     <div class="telemetry-split-grid">
@@ -298,6 +387,101 @@
         <div class="console-lines" id="uart-terminal">
           <!-- Terminal logs rendered dynamically -->
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 6: Features — Interactive Cards (PDF Section 6) -->
+  <section class="features-showcase" id="features">
+    <div class="section-title-wrap">
+      <span class="sub-label">&mdash; CORE PHYSICAL AI CAPABILITIES</span>
+      <h2 class="title-bold">Designed for Real-World Edge Execution.</h2>
+      <p class="desc-muted">Each module handles a distinct phase of visual perception, analytical reasoning, and closed-loop actuation.</p>
+    </div>
+
+    <div class="features-grid">
+      <!-- 1. Object Detection -->
+      <div class="feature-card" id="feat-detection">
+        <div class="feature-icon-wrap icon-detection">
+          <svg class="feat-anim-svg" viewBox="0 0 48 48">
+            <rect class="feat-draw-rect" x="8" y="8" width="32" height="32" rx="4" />
+            <circle cx="24" cy="20" r="5" class="feat-person-head" />
+            <path d="M16,36 C16,28 32,28 32,36" class="feat-person-body" />
+          </svg>
+        </div>
+        <h3>Object Detection</h3>
+        <p>YOLOv8x TensorRT perception detecting shoppers and store staff at 60 FPS.</p>
+        <span class="feat-pill">0.538 mAP50:95</span>
+      </div>
+
+      <!-- 2. Queue Analytics -->
+      <div class="feature-card" id="feat-queue">
+        <div class="feature-icon-wrap icon-queue">
+          <svg class="feat-anim-svg" viewBox="0 0 48 48">
+            <circle cx="12" cy="24" r="4" class="queue-person p1" />
+            <circle cx="24" cy="24" r="4" class="queue-person p2" />
+            <circle cx="36" cy="24" r="4" class="queue-person p3" />
+            <line x1="6" y1="36" x2="42" y2="36" class="queue-line" />
+          </svg>
+        </div>
+        <h3>Queue Analytics</h3>
+        <p>Real-time head counting and wait-time distribution inside cashier polygon ROIs.</p>
+        <span class="feat-pill">Threshold &le; 4</span>
+      </div>
+
+      <!-- 3. Dwell-Time Monitoring -->
+      <div class="feature-card" id="feat-dwell">
+        <div class="feature-icon-wrap icon-dwell">
+          <svg class="feat-anim-svg" viewBox="0 0 48 48">
+            <circle cx="24" cy="24" r="16" class="timer-track" />
+            <circle cx="24" cy="24" r="16" class="timer-progress" />
+            <text x="24" y="28" class="timer-text" text-anchor="middle">SLA</text>
+          </svg>
+        </div>
+        <h3>Dwell-Time Monitoring</h3>
+        <p>Persistent NvDCF tracking tracking customer dwell times against the 45s SLA.</p>
+        <span class="feat-pill">&lt; 45s SLA Target</span>
+      </div>
+
+      <!-- 4. Hardware Actuation -->
+      <div class="feature-card" id="feat-hardware">
+        <div class="feature-icon-wrap icon-hardware">
+          <svg class="feat-anim-svg" viewBox="0 0 48 48">
+            <path d="M6,24 L18,24 L24,14 L30,34 L36,24 L42,24" class="signal-circuit" />
+            <circle cx="42" cy="24" r="3" class="signal-led" />
+          </svg>
+        </div>
+        <h3>Hardware Actuation</h3>
+        <p>Closed-loop GPIO 18 Strobe and GPIO 19 Buzzer triggering via ESP-IDF v5.5.</p>
+        <span class="feat-pill">ESP32-S3 RTOS</span>
+      </div>
+
+      <!-- 5. Edge Optimization -->
+      <div class="feature-card" id="feat-edge">
+        <div class="feature-icon-wrap icon-edge">
+          <svg class="feat-anim-svg" viewBox="0 0 48 48">
+            <path d="M10,34 A16,16 0 1,1 38,34" class="gauge-track" />
+            <line x1="24" y1="24" x2="34" y2="16" class="gauge-needle" />
+            <circle cx="24" cy="24" r="3" class="gauge-center" />
+          </svg>
+        </div>
+        <h3>Edge Optimization</h3>
+        <p>INT8 quantization profile achieving 362 FPS at 14.8W on NVIDIA Jetson Orin.</p>
+        <span class="feat-pill">2.34x TRT Speedup</span>
+      </div>
+
+      <!-- 6. Real-Time Alerts -->
+      <div class="feature-card" id="feat-alerts">
+        <div class="feature-icon-wrap icon-alerts">
+          <svg class="feat-anim-svg" viewBox="0 0 48 48">
+            <path d="M24,10 L38,34 L10,34 Z" class="alert-triangle" />
+            <circle cx="24" cy="28" r="2" class="alert-dot" />
+            <line x1="24" y1="18" x2="24" y2="24" class="alert-excl" />
+          </svg>
+        </div>
+        <h3>Real-Time Alerts</h3>
+        <p>Instant MQTT dispatches and dynamic island notifications during crowd surges.</p>
+        <span class="feat-pill">&lt; 15ms Latency</span>
       </div>
     </div>
   </section>

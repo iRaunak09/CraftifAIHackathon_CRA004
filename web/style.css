@@ -1513,6 +1513,625 @@ body.tech-dark-theme {
   100% { transform: scale(1.2); opacity: 1; }
 }
 
+/* ==============================================================================
+   Hero Staggered Entrance Animations (PDF Section 1: Animation A)
+   ============================================================================== */
+@keyframes heroFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroSlideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(36px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes heroLogoFade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.reveal-logo {
+  animation: heroLogoFade 400ms cubic-bezier(0.16, 1, 0.3, 1) 0ms both;
+}
+
+.reveal-eyebrow {
+  animation: heroFadeUp 400ms cubic-bezier(0.16, 1, 0.3, 1) 100ms both;
+}
+
+.reveal-headline {
+  animation: heroFadeUp 700ms cubic-bezier(0.16, 1, 0.3, 1) 150ms both;
+}
+
+.reveal-desc {
+  animation: heroFadeUp 500ms cubic-bezier(0.16, 1, 0.3, 1) 350ms both;
+}
+
+.reveal-cta {
+  animation: heroFadeUp 450ms cubic-bezier(0.16, 1, 0.3, 1) 500ms both;
+}
+
+.reveal-cockpit {
+  animation: heroSlideInRight 900ms cubic-bezier(0.16, 1, 0.3, 1) 250ms both;
+}
+
+/* ==============================================================================
+   3D AI Perception Object Container (PDF Section 1: Animation B)
+   ============================================================================== */
+.hero-3d-perception-widget {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 30%, rgba(36, 107, 253, 0.28) 0%, rgba(10, 11, 14, 0.95) 75%);
+  border: 1px solid rgba(36, 107, 253, 0.45);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(36, 107, 253, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 25;
+  cursor: grab;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hero-3d-perception-widget:hover {
+  transform: scale(1.08);
+  border-color: var(--c-lime);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), 0 0 25px var(--c-lime-glow);
+}
+
+.perception-3d-canvas-wrap {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+}
+
+.perception-3d-canvas-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.hero-3d-perception-widget .circle-txt {
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0A0B0E;
+  border: 1px solid var(--c-lime);
+  color: var(--c-lime);
+  font-size: 8px;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  pointer-events: none;
+  line-height: 1.1;
+  text-align: center;
+}
+
+/* ==============================================================================
+   Scanning Laser Line (PDF Section 1/3: Animation C & Live Vision)
+   ============================================================================== */
+.laser-scanner-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(36, 107, 253, 0.4) 15%, var(--c-lime) 50%, rgba(36, 107, 253, 0.4) 85%, transparent 100%);
+  box-shadow: 0 0 12px var(--c-lime), 0 0 24px rgba(36, 107, 253, 0.6);
+  pointer-events: none;
+  z-index: 12;
+  opacity: 0.85;
+  animation: laserScan 4.2s ease-in-out infinite;
+}
+
+@keyframes laserScan {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  88% {
+    opacity: 0.9;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* ==============================================================================
+   Section 4: Physical AI — Hardware Flow (PDF Section 4)
+   ============================================================================== */
+.hardware-flow-section {
+  max-width: 1600px;
+  margin: 80px auto;
+  padding: 0 48px;
+}
+
+.hardware-flow-stage {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 36px;
+  background: linear-gradient(180deg, rgba(18, 21, 28, 0.8) 0%, rgba(10, 11, 14, 0.9) 100%);
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+.hw-node-card {
+  flex: 1;
+  min-width: 200px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hw-node-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--c-blue);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(36, 107, 253, 0.25);
+}
+
+.hw-node-card.active {
+  border-color: rgba(36, 107, 253, 0.65);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(36, 107, 253, 0.25);
+}
+
+.hw-node-card.pulse-glow {
+  border-color: var(--c-lime) !important;
+  box-shadow: 0 0 35px var(--c-lime-glow), inset 0 0 24px rgba(198, 248, 6, 0.12) !important;
+  transform: scale(1.03) translateY(-4px);
+}
+
+.node-icon-box {
+  width: 46px;
+  height: 46px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-focus);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  transition: all 0.25s ease;
+}
+
+.hw-node-card.pulse-glow .node-icon-box {
+  background: rgba(198, 248, 6, 0.16);
+  border-color: var(--c-lime);
+  transform: scale(1.12);
+}
+
+.node-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.node-step {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.hw-node-card h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.hw-node-card p {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.node-indicator {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  width: fit-content;
+  border: 1px solid var(--border-dark);
+  transition: all 0.25s ease;
+}
+
+.hw-node-card.pulse-glow .node-indicator {
+  background: rgba(198, 248, 6, 0.2);
+  color: var(--c-lime);
+  border-color: var(--c-lime);
+}
+
+/* Circuit Connectors between nodes */
+.hw-pulse-connector {
+  width: 64px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circuit-wire-svg {
+  width: 100%;
+  height: 24px;
+  overflow: visible;
+}
+
+.circuit-base-line {
+  stroke: rgba(36, 107, 253, 0.35);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}
+
+.circuit-pulse-packet {
+  fill: var(--c-lime);
+  filter: drop-shadow(0 0 6px var(--c-lime));
+  opacity: 0.25;
+  transition: opacity 0.2s ease;
+}
+
+.circuit-pulse-packet.traveling {
+  animation: pulseTravel 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 1;
+}
+
+@keyframes pulseTravel {
+  0% {
+    cx: 0;
+    opacity: 0.3;
+  }
+  30% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    cx: 80;
+    opacity: 0.3;
+  }
+}
+
+.hw-flow-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding: 0 8px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.hw-flow-status {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+/* ==============================================================================
+   Section 6: Features — Interactive Cards (PDF Section 6)
+   ============================================================================== */
+.features-showcase {
+  max-width: 1600px;
+  margin: 80px auto;
+  padding: 0 48px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  margin-top: 36px;
+}
+
+.feature-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-md);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--c-blue);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 24px rgba(36, 107, 253, 0.25);
+}
+
+.feature-icon-wrap {
+  width: 52px;
+  height: 52px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-focus);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.feature-card:hover .feature-icon-wrap {
+  background: rgba(36, 107, 253, 0.12);
+  border-color: var(--c-blue);
+}
+
+.feat-anim-svg {
+  width: 32px;
+  height: 32px;
+  overflow: visible;
+}
+
+/* Distinctive Micro-animations for the 6 Cards */
+
+/* 1. Object Detection: Rectangle draws around icon */
+.feat-draw-rect {
+  fill: rgba(198, 248, 6, 0.08);
+  stroke: var(--c-lime);
+  stroke-width: 2;
+  stroke-dasharray: 120;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.8s ease;
+}
+.feat-person-head {
+  fill: var(--text-white);
+}
+.feat-person-body {
+  stroke: var(--text-white);
+  stroke-width: 2;
+  fill: none;
+}
+.feature-card:hover .feat-draw-rect {
+  animation: drawDetectionBox 1.2s ease-in-out infinite;
+}
+@keyframes drawDetectionBox {
+  0% { stroke-dashoffset: 120; }
+  50% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -120; }
+}
+
+/* 2. Queue Analytics: People move into queue */
+.queue-person {
+  fill: var(--c-blue);
+  transition: transform 0.3s ease;
+}
+.queue-line {
+  stroke: var(--border-focus);
+  stroke-width: 2;
+}
+.feature-card:hover .queue-person.p1 {
+  animation: queueHop 0.9s ease-in-out infinite 0s;
+}
+.feature-card:hover .queue-person.p2 {
+  animation: queueHop 0.9s ease-in-out infinite 0.18s;
+}
+.feature-card:hover .queue-person.p3 {
+  animation: queueHop 0.9s ease-in-out infinite 0.36s;
+}
+@keyframes queueHop {
+  0%, 100% { transform: translateY(0); fill: var(--c-blue); }
+  50% { transform: translateY(-4px); fill: var(--c-lime); }
+}
+
+/* 3. Dwell-Time Monitoring: Circular timer progresses */
+.timer-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 3;
+}
+.timer-progress {
+  fill: none;
+  stroke: var(--c-lime);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 35;
+  transform-origin: center;
+  transform: rotate(-90deg);
+  transition: stroke-dashoffset 0.6s ease;
+}
+.timer-text {
+  fill: var(--c-lime);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+}
+.feature-card:hover .timer-progress {
+  animation: timerSpin 2s linear infinite;
+}
+@keyframes timerSpin {
+  0% { stroke-dashoffset: 100; transform: rotate(-90deg); }
+  50% { stroke-dashoffset: 20; transform: rotate(90deg); }
+  100% { stroke-dashoffset: 100; transform: rotate(270deg); }
+}
+
+/* 4. Hardware Actuation: Signal travels along circuit */
+.signal-circuit {
+  fill: none;
+  stroke: var(--c-blue);
+  stroke-width: 2;
+  stroke-dasharray: 6 3;
+  animation: circuitFlow 2s linear infinite;
+}
+.signal-led {
+  fill: var(--c-lime);
+  filter: drop-shadow(0 0 6px var(--c-lime));
+  animation: ledBlink 1.4s infinite alternate;
+}
+@keyframes circuitFlow {
+  to { stroke-dashoffset: -36; }
+}
+@keyframes ledBlink {
+  0% { opacity: 0.3; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1.2); }
+}
+
+/* 5. Edge Optimization: Processing indicators accelerate */
+.gauge-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.gauge-needle {
+  stroke: var(--c-lime);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  transform-origin: 24px 24px;
+  animation: gaugeSweep 2.5s ease-in-out infinite alternate;
+}
+.gauge-center {
+  fill: var(--text-white);
+}
+@keyframes gaugeSweep {
+  0% { transform: rotate(-40deg); }
+  50% { transform: rotate(25deg); }
+  100% { transform: rotate(60deg); }
+}
+.feature-card:hover .gauge-needle {
+  animation-duration: 0.8s;
+}
+
+/* 6. Real-Time Alerts: Status indicator activates */
+.alert-triangle {
+  fill: rgba(255, 42, 85, 0.12);
+  stroke: #FF2A55;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  transition: all 0.2s ease;
+}
+.alert-dot {
+  fill: #FF2A55;
+  animation: alertBlink 1.2s infinite alternate;
+}
+.alert-excl {
+  stroke: #FF2A55;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.feature-card:hover .alert-triangle {
+  filter: drop-shadow(0 0 8px rgba(255, 42, 85, 0.6));
+  transform: scale(1.05);
+  transform-origin: center;
+}
+@keyframes alertBlink {
+  0% { opacity: 0.4; }
+  100% { opacity: 1; filter: drop-shadow(0 0 4px #FF2A55); }
+}
+
+.feature-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.feature-card p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.feat-pill {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(36, 107, 253, 0.12);
+  color: var(--c-blue);
+  width: fit-content;
+  border: 1px solid rgba(36, 107, 253, 0.3);
+}
+
+.feature-card:hover .feat-pill {
+  background: rgba(198, 248, 6, 0.15);
+  color: var(--c-lime);
+  border-color: var(--c-lime);
+}
+
+/* ==============================================================================
+   Section 7: Footer Subtle Animated Line
+   ============================================================================== */
+.clean-footer {
+  position: relative;
+}
+.clean-footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(36, 107, 253, 0.5) 25%, var(--c-lime) 50%, rgba(36, 107, 253, 0.5) 75%, transparent 100%);
+  background-size: 200% 100%;
+  animation: footerGradientMove 8s linear infinite;
+}
+@keyframes footerGradientMove {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
+}
+
+/* ==============================================================================
+   Reduced Motion Accessibility (PDF Section 8)
+   ============================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .hero-container {
@@ -1527,4 +2146,14 @@ body.tech-dark-theme {
   .submission-card-full {
     grid-template-columns: 1fr;
   }
+  .hardware-flow-stage {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .hw-pulse-connector {
+    width: 24px;
+    height: 36px;
+    transform: rotate(90deg);
+  }
 }
+
