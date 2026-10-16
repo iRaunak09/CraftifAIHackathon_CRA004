@@ -336,7 +336,7 @@ pipegen compile \\
 
   // Canvas Drawing Routine
   function drawStoreMap() {
-    ctx.fillStyle = "#080E19";
+    ctx.fillStyle = "#07080B";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // If live webcam is active, render webcam frame as background
@@ -344,21 +344,21 @@ pipegen compile \\
       ctx.drawImage(webcamVideo, 0, 0, canvas.width, canvas.height);
 
       // Overlay live DeepStream HUD
-      ctx.fillStyle = "rgba(11, 18, 32, 0.85)";
+      ctx.fillStyle = "rgba(10, 11, 14, 0.88)";
       ctx.fillRect(20, 20, 380, 50);
-      ctx.strokeStyle = "#246BFD";
+      ctx.strokeStyle = "#C6F806";
       ctx.lineWidth = 1.5;
       ctx.strokeRect(20, 20, 380, 50);
-      ctx.fillStyle = "#D9FF3F";
+      ctx.fillStyle = "#C6F806";
       ctx.font = "bold 11px 'JetBrains Mono', monospace";
       ctx.fillText("LIVE V4L2 USB CAMERA • DEEPSTREAM 7.0", 34, 40);
-      ctx.fillStyle = "#94A3B8";
+      ctx.fillStyle = "#848E9F";
       ctx.font = "10px 'JetBrains Mono', monospace";
       ctx.fillText("YOLOv8x FP16 • 4.88ms • 60 FPS • TRT ENGINE", 34, 56);
 
       // Draw dynamic detection box in center of webcam
       const isQueueAlert = dashboardState && dashboardState.metrics && dashboardState.metrics.queue_alert_active;
-      const boxColor = isQueueAlert ? "#EF4444" : "#246BFD";
+      const boxColor = isQueueAlert ? "#FF2A55" : "#C6F806";
       ctx.strokeStyle = boxColor;
       ctx.lineWidth = 3;
       ctx.strokeRect(460, 160, 360, 420);
@@ -366,13 +366,13 @@ pipegen compile \\
       // Label pill
       ctx.fillStyle = boxColor;
       ctx.fillRect(460, 128, 240, 32);
-      ctx.fillStyle = "#0B1220";
+      ctx.fillStyle = "#0A0B0E";
       ctx.font = "bold 12px 'JetBrains Mono', monospace";
       ctx.fillText("#101 PERSON [98.4%] FP16", 470, 150);
 
       // Virtual queue tripwire overlay on webcam
       if (chkTripwire && chkTripwire.checked) {
-        ctx.strokeStyle = "#D9FF3F";
+        ctx.strokeStyle = "#C6F806";
         ctx.lineWidth = 3;
         ctx.setLineDash([8, 6]);
         ctx.beginPath();
@@ -380,7 +380,7 @@ pipegen compile \\
         ctx.lineTo(1180, 600);
         ctx.stroke();
         ctx.setLineDash([]);
-        ctx.fillStyle = "#D9FF3F";
+        ctx.fillStyle = "#C6F806";
         ctx.font = "bold 12px 'JetBrains Mono', monospace";
         ctx.fillText("TRIPWIRE ENTRANCE COUNTING LINE", 110, 590);
       }
@@ -388,7 +388,7 @@ pipegen compile \\
     }
 
     // Floor Tiles Grid (Overhead Synthetic Store Mode)
-    ctx.strokeStyle = "rgba(38, 52, 73, 0.4)";
+    ctx.strokeStyle = "rgba(30, 35, 47, 0.45)";
     ctx.lineWidth = 1;
     for (let x = 0; x < canvas.width; x += 60) {
       ctx.beginPath();
@@ -404,8 +404,8 @@ pipegen compile \\
     }
 
     if (chkZones && chkZones.checked) {
-      // 1. Promotional Aisle Area (Electric Blue Overlay)
-      ctx.fillStyle = "rgba(36, 107, 253, 0.12)";
+      // 1. Promotional Aisle Area (Subtle Glow Overlay)
+      ctx.fillStyle = "rgba(36, 107, 253, 0.1)";
       ctx.strokeStyle = "#246BFD";
       ctx.lineWidth = 2;
       ctx.fillRect(100, 150, 420, 320);
@@ -415,8 +415,8 @@ pipegen compile \\
       ctx.fillText("PROMOTIONAL AISLE (HEAT ZONE)", 115, 175);
 
       // Shelves inside aisle
-      ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-      ctx.strokeStyle = "rgba(148, 163, 184, 0.25)";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
+      ctx.strokeStyle = "rgba(132, 142, 159, 0.25)";
       ctx.fillRect(130, 210, 160, 35);
       ctx.strokeRect(130, 210, 160, 35);
       ctx.fillRect(330, 210, 160, 35);
@@ -430,17 +430,17 @@ pipegen compile \\
       ctx.fillRect(330, 390, 160, 35);
       ctx.strokeRect(330, 390, 160, 35);
 
-      // 2. Checkout Queue Polygon Area (Signal Lime #D9FF3F / Critical Alert #EF4444)
+      // 2. Checkout Queue Polygon Area (Electric Neon Lime #C6F806 / Alert #FF2A55)
       const isQueueAlert = dashboardState && dashboardState.metrics && dashboardState.metrics.queue_alert_active;
-      ctx.fillStyle = isQueueAlert ? "rgba(239, 68, 68, 0.22)" : "rgba(217, 255, 63, 0.12)";
-      ctx.strokeStyle = isQueueAlert ? "#EF4444" : "#D9FF3F";
+      ctx.fillStyle = isQueueAlert ? "rgba(255, 42, 85, 0.22)" : "rgba(198, 248, 6, 0.12)";
+      ctx.strokeStyle = isQueueAlert ? "#FF2A55" : "#C6F806";
       ctx.lineWidth = isQueueAlert ? 3 : 2;
       ctx.fillRect(630, 240, 520, 320);
       ctx.strokeRect(630, 240, 520, 320);
 
       // Cashier Counter Blocks
-      ctx.fillStyle = "#111C30";
-      ctx.strokeStyle = "#263449";
+      ctx.fillStyle = "#12151C";
+      ctx.strokeStyle = "#1E232F";
       ctx.fillRect(1020, 270, 90, 40);
       ctx.strokeRect(1020, 270, 90, 40);
       ctx.fillRect(1020, 380, 90, 40);
@@ -448,13 +448,13 @@ pipegen compile \\
       ctx.fillRect(1020, 490, 90, 40);
       ctx.strokeRect(1020, 490, 90, 40);
 
-      ctx.fillStyle = "#F5F7FA";
+      ctx.fillStyle = "#FFFFFF";
       ctx.font = "10px 'JetBrains Mono', monospace";
       ctx.fillText("REGISTER 1", 1030, 295);
       ctx.fillText("REGISTER 2", 1030, 405);
       ctx.fillText("REGISTER 3", 1030, 515);
 
-      ctx.fillStyle = isQueueAlert ? "#EF4444" : "#D9FF3F";
+      ctx.fillStyle = isQueueAlert ? "#FF2A55" : "#C6F806";
       ctx.font = "bold 13px 'Plus Jakarta Sans', sans-serif";
       const qCount = dashboardState && dashboardState.metrics ? dashboardState.metrics.queue_count : 0;
       ctx.fillText(`CHECKOUT QUEUE ROI (${qCount} Waiting)`, 650, 270);
@@ -484,7 +484,7 @@ pipegen compile \\
       dashboardState.tracks.forEach(c => {
         const cx = c.x * scaleX * 1.5;
         const cy = c.y * scaleY * 1.35;
-        const customerColor = c.in_queue ? "#D9FF3F" : "#246BFD";
+        const customerColor = c.in_queue ? "#C6F806" : "#246BFD";
 
         // Motion Trail / Tracking Paths
         if (chkTrails && chkTrails.checked && c.trail && c.trail.length > 1) {
@@ -516,7 +516,7 @@ pipegen compile \\
         ctx.globalAlpha = 1.0;
 
         // Tag label
-        ctx.fillStyle = "#0B1220";
+        ctx.fillStyle = "#0A0B0E";
         ctx.fillRect(cx - bw / 2, cy - bh / 2 - 16, bw + 24, 14);
         ctx.fillStyle = customerColor;
         ctx.font = "9px 'JetBrains Mono', monospace";
@@ -524,7 +524,7 @@ pipegen compile \\
 
         // Dwell Timer if in queue
         if (c.in_queue) {
-          ctx.fillStyle = "#D9FF3F";
+          ctx.fillStyle = "#C6F806";
           ctx.font = "bold 9px 'JetBrains Mono', monospace";
           ctx.fillText(`${Math.round(c.dwell_time)}s`, cx - bw / 2 + 2, cy + bh / 2 + 11);
         }
