@@ -582,6 +582,16 @@ pipegen compile \\
     kpiQueue.textContent = m.queue_count;
     kpiWaitTime.textContent = m.avg_wait_time_sec.toFixed(1);
 
+    // Live Hardware Telemetry in Deployment Metrics Card
+    const tableLatency = document.getElementById("table-live-latency");
+    const tableFps = document.getElementById("table-live-fps");
+    if (tableLatency && dashboardState.system) {
+      tableLatency.textContent = `${dashboardState.system.latency_ms.toFixed(2)} ms (FP16)`;
+    }
+    if (tableFps && dashboardState.system) {
+      tableFps.textContent = `${dashboardState.system.fps.toFixed(1)} FPS (205 Peak)`;
+    }
+
     if (m.queue_alert_active) {
       cardQueue.classList.add("alert-active");
       queueBadge.className = "kpi-badge badge-alert";
