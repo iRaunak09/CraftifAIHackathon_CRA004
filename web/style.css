@@ -67,53 +67,7 @@ body.tech-dark-theme {
 }
 
 /* ==============================================================================
-   1. Top Ticker Strip
-   ============================================================================== */
-.top-ticker {
-  background-color: #060709;
-  color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  padding: 8px 36px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-family: var(--font-mono);
-  border-bottom: 1px solid var(--border-dark);
-}
-
-.ticker-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.ticker-dot {
-  width: 6px;
-  height: 6px;
-  background-color: var(--c-lime);
-  border-radius: 50%;
-  box-shadow: 0 0 10px var(--c-lime);
-}
-
-.ticker-text {
-  color: #a1adbf;
-}
-
-.ticker-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-dim);
-}
-
-.ticker-sep {
-  opacity: 0.3;
-}
-
-/* ==============================================================================
-   2. Navigation Bar
+   1. Navigation Bar
    ============================================================================== */
 .main-nav {
   display: flex;
