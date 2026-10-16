@@ -394,6 +394,23 @@ pipegen compile \\
     });
   }
 
+  // 3D Isometric View Mode State
+  let is3DIsometricMode = true;
+  const btnToggle3D = document.getElementById("btn-toggle-3d");
+  if (btnToggle3D) {
+    btnToggle3D.classList.add("active");
+    btnToggle3D.addEventListener("click", () => {
+      is3DIsometricMode = !is3DIsometricMode;
+      btnToggle3D.classList.toggle("active", is3DIsometricMode);
+      btnToggle3D.textContent = is3DIsometricMode ? "📐 2D Overhead" : "🧊 3D Digital Twin";
+      if (streamLabel) {
+        streamLabel.textContent = is3DIsometricMode 
+          ? "CAMERA 01: 3D ISOMETRIC DIGITAL TWIN" 
+          : "CAMERA 01: OVERHEAD STORE TRACKER";
+      }
+    });
+  }
+
   let animTick = 0;
   const occupancyHistory = [22, 23, 24, 25, 24, 23, 24, 25, 26, 24, 25];
   const waitTimeHistory = [32, 33, 31, 34, 33, 32, 35, 33, 34, 32, 33];
@@ -417,61 +434,388 @@ pipegen compile \\
     areaEl.setAttribute("d", `M 0,${height} L ` + pts.join(" L ") + ` L ${width},${height} Z`);
   }
 
-  // Canvas Drawing Routine
-  function drawStoreMap() {
-    animTick += 0.05;
-    ctx.fillStyle = "#07080B";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // 3D Isometric Projection Helper (Maps 3D coords to 2D canvas screen coords)
+  function projectIso(x, y, z = 0) {
+    const originX = canvas.width / 2;
+    const originY = 320;
+    const cosAngle = 0.866; // cos(30 deg)
+    const sinAngle = 0.5;   // sin(30 deg)
+    const scale = 0.62;
 
-    // If live webcam is active, render webcam frame as background
-    if (isWebcamActive && webcamVideo && webcamVideo.readyState >= 2) {
-      ctx.drawImage(webcamVideo, 0, 0, canvas.width, canvas.height);
+    const nx = (x - 640) * scale;
+    const ny = (y - 360) * scale;
 
-      // Overlay live DeepStream HUD
-      ctx.fillStyle = "rgba(10, 11, 14, 0.88)";
-      ctx.fillRect(20, 20, 380, 50);
-      ctx.strokeStyle = "#C6F806";
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(20, 20, 380, 50);
-      ctx.fillStyle = "#C6F806";
-      ctx.font = "bold 11px 'JetBrains Mono', monospace";
-      ctx.fillText("LIVE V4L2 USB CAMERA • DEEPSTREAM 7.0", 34, 40);
-      ctx.fillStyle = "#848E9F";
-      ctx.font = "10px 'JetBrains Mono', monospace";
-      ctx.fillText("YOLOv8x FP16 • 4.88ms • 60 FPS • TRT ENGINE", 34, 56);
+    const screenX = originX + (nx - ny) * cosAngle;
+    const screenY = originY + (nx + ny) * sinAngle - (z * scale * 0.95);
+    return { x: screenX, y: screenY };
+  }
 
-      // Draw dynamic detection box in center of webcam
-      const isQueueAlert = dashboardState && dashboardState.metrics && dashboardState.metrics.queue_alert_active;
-      const boxColor = isQueueAlert ? "#FF2A55" : "#C6F806";
-      ctx.strokeStyle = boxColor;
-      ctx.lineWidth = 3;
-      ctx.strokeRect(460, 160, 360, 420);
+  // Draw 3D Extruded Wireframe Cuboid
+  function draw3DCuboid(x, y, w, h, heightZ, fillColor, strokeColor, alpha = 0.25) {
+    const p1 = projectIso(x + w, y, 0);
+    const p2 = projectIso(x + w, y + h, 0);
+    const p3 = projectIso(x, y + h, 0);
 
-      // Label pill
-      ctx.fillStyle = boxColor;
-      ctx.fillRect(460, 128, 240, 32);
-      ctx.fillStyle = "#0A0B0E";
-      ctx.font = "bold 12px 'JetBrains Mono', monospace";
-      ctx.fillText("#101 PERSON [98.4%] FP16", 470, 150);
+    const t0 = projectIso(x, y, heightZ);
+    const t1 = projectIso(x + w, y, heightZ);
+    const t2 = projectIso(x + w, y + h, heightZ);
+    const t3 = projectIso(x, y + h, heightZ);
 
-      // Virtual queue tripwire overlay on webcam
-      if (chkTripwire && chkTripwire.checked) {
-        ctx.strokeStyle = "#C6F806";
-        ctx.lineWidth = 3;
-        ctx.setLineDash([8, 6]);
-        ctx.beginPath();
-        ctx.moveTo(100, 600);
-        ctx.lineTo(1180, 600);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.fillStyle = "#C6F806";
-        ctx.font = "bold 12px 'JetBrains Mono', monospace";
-        ctx.fillText("TRIPWIRE ENTRANCE COUNTING LINE", 110, 590);
-      }
-      return;
+    ctx.save();
+    // Front-Right Wall
+    ctx.fillStyle = fillColor;
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = alpha * 0.8;
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.lineTo(t2.x, t2.y);
+    ctx.lineTo(t1.x, t1.y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Front-Left Wall
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.moveTo(p2.x, p2.y);
+    ctx.lineTo(p3.x, p3.y);
+    ctx.lineTo(t3.x, t3.y);
+    ctx.lineTo(t2.x, t2.y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Top Roof
+    ctx.globalAlpha = Math.min(0.9, alpha * 1.5);
+    ctx.beginPath();
+    ctx.moveTo(t0.x, t0.y);
+    ctx.lineTo(t1.x, t1.y);
+    ctx.lineTo(t2.x, t2.y);
+    ctx.lineTo(t3.x, t3.y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // 3D Isometric Store Scene Drawing Routine
+  function drawStore3DIsometric() {
+    // 1. Draw 3D Ground Perimeter & Isometric Grid
+    ctx.save();
+    const g0 = projectIso(60, 60, 0);
+    const g1 = projectIso(1220, 60, 0);
+    const g2 = projectIso(1220, 660, 0);
+    const g3 = projectIso(60, 660, 0);
+
+    // Subtle 3D floor wash
+    ctx.fillStyle = "rgba(18, 21, 28, 0.4)";
+    ctx.beginPath();
+    ctx.moveTo(g0.x, g0.y);
+    ctx.lineTo(g1.x, g1.y);
+    ctx.lineTo(g2.x, g2.y);
+    ctx.lineTo(g3.x, g3.y);
+    ctx.closePath();
+    ctx.fill();
+
+    // Floor isometric grid lines
+    ctx.strokeStyle = "rgba(30, 35, 47, 0.5)";
+    ctx.lineWidth = 1;
+    for (let gx = 60; gx <= 1220; gx += 116) {
+      const pa = projectIso(gx, 60, 0);
+      const pb = projectIso(gx, 660, 0);
+      ctx.beginPath();
+      ctx.moveTo(pa.x, pa.y);
+      ctx.lineTo(pb.x, pb.y);
+      ctx.stroke();
+    }
+    for (let gy = 60; gy <= 660; gy += 60) {
+      const pa = projectIso(60, gy, 0);
+      const pb = projectIso(1220, gy, 0);
+      ctx.beginPath();
+      ctx.moveTo(pa.x, pa.y);
+      ctx.lineTo(pb.x, pb.y);
+      ctx.stroke();
     }
 
-    // Floor Tiles Grid (Overhead Synthetic Store Mode)
+    // Glowing floor boundary ring
+    ctx.strokeStyle = "rgba(198, 248, 6, 0.25)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+
+    // 2. Ceiling-Mounted Camera Sensor & 3D Vision Frustum
+    const sensorCam = projectIso(640, 60, 240);
+    ctx.save();
+    // 4 Corner Laser Rays from Camera Frustum
+    ctx.strokeStyle = "rgba(198, 248, 6, 0.12)";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([6, 6]);
+    [g0, g1, g2, g3].forEach(corner => {
+      ctx.beginPath();
+      ctx.moveTo(sensorCam.x, sensorCam.y);
+      ctx.lineTo(corner.x, corner.y);
+      ctx.stroke();
+    });
+    ctx.setLineDash([]);
+
+    // Camera Sensor Node
+    ctx.fillStyle = "#12151C";
+    ctx.strokeStyle = "#C6F806";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(sensorCam.x, sensorCam.y, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#FF2A55";
+    ctx.beginPath();
+    ctx.arc(sensorCam.x, sensorCam.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#C6F806";
+    ctx.font = "bold 9px 'JetBrains Mono', monospace";
+    ctx.fillText("CAM-01 [OVERHEAD GIE]", sensorCam.x - 55, sensorCam.y - 12);
+    ctx.restore();
+
+    // 3. Promotional Aisle (3D Extruded Shelves)
+    if (chkZones && chkZones.checked) {
+      // 3D Promotional Aisle Floor Zone
+      const z0 = projectIso(100, 150, 0);
+      const z1 = projectIso(520, 150, 0);
+      const z2 = projectIso(520, 470, 0);
+      const z3 = projectIso(100, 470, 0);
+
+      ctx.save();
+      ctx.fillStyle = "rgba(36, 107, 253, 0.08)";
+      ctx.strokeStyle = "#246BFD";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(z0.x, z0.y); ctx.lineTo(z1.x, z1.y); ctx.lineTo(z2.x, z2.y); ctx.lineTo(z3.x, z3.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "#93c5fd";
+      ctx.font = "bold 11px 'Plus Jakarta Sans', sans-serif";
+      ctx.fillText("3D PROMOTIONAL AISLE (HEAT ZONE)", z0.x + 10, z0.y + 16);
+      ctx.restore();
+
+      // Extrude 3D Shelves inside aisle
+      for (let sy = 200; sy <= 380; sy += 90) {
+        draw3DCuboid(130, sy, 150, 35, 38, "#246BFD", "#60a5fa", 0.3);
+        draw3DCuboid(320, sy, 150, 35, 38, "#246BFD", "#60a5fa", 0.3);
+      }
+    }
+
+    // 4. Checkout Queue Polygon (3D Volumetric Area with Vertical Laser Pillars)
+    if (chkZones && chkZones.checked) {
+      const isQueueAlert = dashboardState && dashboardState.metrics && dashboardState.metrics.queue_alert_active;
+      const qCount = dashboardState && dashboardState.metrics ? dashboardState.metrics.queue_count : 0;
+      const qColor = isQueueAlert ? "#FF2A55" : "#C6F806";
+      const qRgb = isQueueAlert ? "255, 42, 85" : "198, 248, 6";
+
+      // 4 Ground Points
+      const q0 = projectIso(630, 240, 0);
+      const q1 = projectIso(1150, 240, 0);
+      const q2 = projectIso(1150, 560, 0);
+      const q3 = projectIso(630, 560, 0);
+
+      // 4 Top Laser Points at Z = 55
+      const h0 = projectIso(630, 240, 55);
+      const h1 = projectIso(1150, 240, 55);
+      const h2 = projectIso(1150, 560, 55);
+      const h3 = projectIso(630, 560, 55);
+
+      ctx.save();
+      // Translucent Ground Wash
+      ctx.fillStyle = `rgba(${qRgb}, ${isQueueAlert ? '0.2' : '0.1'})`;
+      ctx.beginPath();
+      ctx.moveTo(q0.x, q0.y); ctx.lineTo(q1.x, q1.y); ctx.lineTo(q2.x, q2.y); ctx.lineTo(q3.x, q3.y);
+      ctx.closePath();
+      ctx.fill();
+
+      // Vertical Laser Corner Columns
+      ctx.strokeStyle = qColor;
+      ctx.lineWidth = 2;
+      [ [q0, h0], [q1, h1], [q2, h2], [q3, h3] ].forEach(([b, t]) => {
+        ctx.beginPath();
+        ctx.moveTo(b.x, b.y);
+        ctx.lineTo(t.x, t.y);
+        ctx.stroke();
+      });
+
+      // Top Floating Perimeter Ring
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath();
+      ctx.moveTo(h0.x, h0.y); ctx.lineTo(h1.x, h1.y); ctx.lineTo(h2.x, h2.y); ctx.lineTo(h3.x, h3.y);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Floating 3D Zone Tag
+      ctx.fillStyle = qColor;
+      ctx.font = "bold 12px 'Plus Jakarta Sans', sans-serif";
+      const labelPt = projectIso(630, 240, 75);
+      const qTxt = isQueueAlert 
+        ? `🚨 3D QUEUE OVERFLOW (${qCount} Waiting • SLA Alert)`
+        : `CHECKOUT QUEUE ROI (${qCount} Waiting)`;
+      ctx.fillText(qTxt, labelPt.x, labelPt.y);
+      ctx.restore();
+
+      // 3D Cashier Registers
+      [270, 380, 490].forEach((ry, idx) => {
+        draw3DCuboid(1020, ry, 90, 40, 44, "#1E232F", "#848E9F", 0.35);
+        const regTop = projectIso(1020 + 45, ry + 20, 50);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "9px 'JetBrains Mono', monospace";
+        ctx.fillText(`REG ${idx + 1}`, regTop.x - 14, regTop.y - 2);
+      });
+    }
+
+    // 5. 3D Tripwire Line & Floating Directional Chevrons
+    if (chkTripwire && chkTripwire.checked) {
+      const tripwireY = 630;
+      const tInStart = projectIso(80, tripwireY, 0);
+      const tInEnd = projectIso(330, tripwireY, 0);
+      const tOutStart = projectIso(350, tripwireY, 0);
+      const tOutEnd = projectIso(600, tripwireY, 0);
+
+      ctx.save();
+      // Entrance [IN] Line
+      ctx.strokeStyle = "#C6F806";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(tInStart.x, tInStart.y);
+      ctx.lineTo(tInEnd.x, tInEnd.y);
+      ctx.stroke();
+
+      // Animated 3D Floating UP Chevrons
+      const inShift = (animTick * 12) % 30;
+      ctx.fillStyle = "#C6F806";
+      ctx.font = "bold 11px 'JetBrains Mono', monospace";
+      for (let ax = 100; ax < 320; ax += 50) {
+        const floatZ = 12 + Math.sin(animTick + ax) * 4;
+        const arrowPt = projectIso(ax, tripwireY - inShift, floatZ);
+        ctx.fillText("▲", arrowPt.x, arrowPt.y);
+      }
+      const inLabelPt = projectIso(90, tripwireY + 30, 15);
+      ctx.fillText("ENTRANCE [IN] TRIPWIRE", inLabelPt.x, inLabelPt.y);
+
+      // Exit [OUT] Line
+      ctx.strokeStyle = "#246BFD";
+      ctx.beginPath();
+      ctx.moveTo(tOutStart.x, tOutStart.y);
+      ctx.lineTo(tOutEnd.x, tOutEnd.y);
+      ctx.stroke();
+
+      // Animated 3D Floating DOWN Chevrons
+      const outShift = (animTick * 12) % 30;
+      ctx.fillStyle = "#246BFD";
+      for (let bx = 370; bx < 590; bx += 50) {
+        const floatZ = 12 + Math.cos(animTick + bx) * 4;
+        const arrowPt = projectIso(bx, tripwireY + outShift, floatZ);
+        ctx.fillText("▼", arrowPt.x, arrowPt.y);
+      }
+      const outLabelPt = projectIso(370, tripwireY - 20, 15);
+      ctx.fillText("EXIT [OUT] TRIPWIRE", outLabelPt.x, outLabelPt.y);
+      ctx.restore();
+    }
+
+    // 6. Tracked Customers: 3D Wireframe Bounding Cuboids & Motion Trails
+    if (dashboardState && dashboardState.tracks) {
+      const scaleX = canvas.width / 1920;
+      const scaleY = canvas.height / 1080;
+
+      dashboardState.tracks.forEach(c => {
+        const cx = c.x * scaleX * 1.5;
+        const cy = c.y * scaleY * 1.35;
+        const customerColor = c.in_queue ? "#C6F806" : "#246BFD";
+
+        // 3D Motion Trail along Floor Plane
+        if (chkTrails && chkTrails.checked && c.trail && c.trail.length > 1) {
+          ctx.save();
+          ctx.strokeStyle = customerColor;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          c.trail.forEach((p, idx) => {
+            const px = p[0] * scaleX * 1.5;
+            const py = p[1] * scaleY * 1.35;
+            const sPt = projectIso(px, py, 0);
+            ctx.globalAlpha = Math.min(0.6, (idx / c.trail.length) * 0.7);
+            if (idx === 0) ctx.moveTo(sPt.x, sPt.y);
+            else ctx.lineTo(sPt.x, sPt.y);
+          });
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Ground Contact Shadow Ellipse
+        const groundPt = projectIso(cx, cy, 0);
+        ctx.save();
+        ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
+        ctx.beginPath();
+        ctx.ellipse(groundPt.x, groundPt.y, 14, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 3D Extruded Wireframe Cuboid (Height Z = 60)
+        draw3DCuboid(cx - 12, cy - 12, 24, 24, 60, customerColor, customerColor, 0.22);
+
+        // Hovering 3D ID Pill Tag at Z = 78
+        const tagPt = projectIso(cx, cy, 78);
+        ctx.fillStyle = "#0A0B0E";
+        ctx.fillRect(tagPt.x - 22, tagPt.y - 12, 44, 14);
+        ctx.strokeStyle = customerColor;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(tagPt.x - 22, tagPt.y - 12, 44, 14);
+
+        ctx.fillStyle = customerColor;
+        ctx.font = "bold 9px 'JetBrains Mono', monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(`ID:${c.id}`, tagPt.x, tagPt.y - 2);
+
+        // Dwell Timer if in queue
+        if (c.in_queue) {
+          ctx.fillStyle = "#C6F806";
+          ctx.fillText(`${Math.round(c.dwell_time)}s`, tagPt.x, tagPt.y + 11);
+        }
+        ctx.textAlign = "left";
+        ctx.restore();
+      });
+    }
+
+    // Top-Left Cybernetic 3D HUD Watermark
+    ctx.fillStyle = "rgba(10, 11, 14, 0.85)";
+    ctx.fillRect(16, 14, 460, 32);
+    ctx.strokeStyle = "rgba(198, 248, 6, 0.35)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(16, 14, 460, 32);
+    ctx.fillStyle = "#C6F806";
+    ctx.beginPath();
+    ctx.arc(32, 30, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "bold 11px 'JetBrains Mono', monospace";
+    ctx.fillText("CAM-01: 3D ISOMETRIC DIGITAL TWIN", 44, 34);
+    ctx.fillStyle = "#848E9F";
+    ctx.font = "10px 'JetBrains Mono', monospace";
+    ctx.fillText("3D FRUSTUM • 60 FPS • TRT FP16", 280, 34);
+
+    // Top-Right Live Timecode
+    ctx.fillStyle = "rgba(10, 11, 14, 0.85)";
+    ctx.fillRect(canvas.width - 240, 14, 224, 32);
+    ctx.strokeStyle = "rgba(36, 107, 253, 0.35)";
+    ctx.strokeRect(canvas.width - 240, 14, 224, 32);
+    ctx.fillStyle = "#246BFD";
+    ctx.font = "bold 10px 'JetBrains Mono', monospace";
+    ctx.fillText(`3D REC // ${new Date().toLocaleTimeString()}`, canvas.width - 228, 34);
+  }
+
+  // 2D Overhead Drawing Routine
+  function drawStore2D() {
+    // Floor Tiles Grid
     ctx.strokeStyle = "rgba(30, 35, 47, 0.45)";
     ctx.lineWidth = 1;
     for (let x = 0; x < canvas.width; x += 60) {
@@ -701,6 +1045,49 @@ pipegen compile \\
     }
   }
 
+  // Master Canvas Drawing Routine (Switches between Live Webcam, 3D Isometric, and 2D Plan)
+  function drawStoreMap() {
+    animTick += 0.05;
+    ctx.fillStyle = "#07080B";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (isWebcamActive && webcamVideo && webcamVideo.readyState >= 2) {
+      ctx.drawImage(webcamVideo, 0, 0, canvas.width, canvas.height);
+
+      // Overlay live DeepStream HUD
+      ctx.fillStyle = "rgba(10, 11, 14, 0.88)";
+      ctx.fillRect(20, 20, 380, 50);
+      ctx.strokeStyle = "#C6F806";
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(20, 20, 380, 50);
+      ctx.fillStyle = "#C6F806";
+      ctx.font = "bold 11px 'JetBrains Mono', monospace";
+      ctx.fillText("LIVE V4L2 USB CAMERA • DEEPSTREAM 7.0", 34, 40);
+      ctx.fillStyle = "#848E9F";
+      ctx.font = "10px 'JetBrains Mono', monospace";
+      ctx.fillText("YOLOv8x FP16 • 4.88ms • 60 FPS • TRT ENGINE", 34, 56);
+
+      const isQueueAlert = dashboardState && dashboardState.metrics && dashboardState.metrics.queue_alert_active;
+      const boxColor = isQueueAlert ? "#FF2A55" : "#C6F806";
+      ctx.strokeStyle = boxColor;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(460, 160, 360, 420);
+
+      ctx.fillStyle = boxColor;
+      ctx.fillRect(460, 128, 240, 32);
+      ctx.fillStyle = "#0A0B0E";
+      ctx.font = "bold 12px 'JetBrains Mono', monospace";
+      ctx.fillText("#101 PERSON [98.4%] FP16", 470, 150);
+      return;
+    }
+
+    if (is3DIsometricMode) {
+      drawStore3DIsometric();
+    } else {
+      drawStore2D();
+    }
+  }
+
   // Poll Real-Time State
   async function fetchState() {
     try {
@@ -838,6 +1225,139 @@ pipegen compile \\
     }
   }
 
+  // ============================================================================
+  // 3D Ambient Particle Constellation Background (Full-Screen Canvas)
+  // ============================================================================
+  function init3DParticleBackground() {
+    const pCanvas = document.getElementById("bg-particle-canvas");
+    if (!pCanvas) return;
+    const pCtx = pCanvas.getContext("2d");
+
+    let pWidth = (pCanvas.width = window.innerWidth);
+    let pHeight = (pCanvas.height = window.innerHeight);
+
+    window.addEventListener("resize", () => {
+      pWidth = pCanvas.width = window.innerWidth;
+      pHeight = pCanvas.height = window.innerHeight;
+    });
+
+    const numParticles = 75;
+    const particles = [];
+    for (let i = 0; i < numParticles; i++) {
+      particles.push({
+        x: (Math.random() - 0.5) * 1600,
+        y: (Math.random() - 0.5) * 1200,
+        z: Math.random() * 800 + 200,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        vz: (Math.random() - 0.5) * 0.45,
+        size: Math.random() * 2 + 1.2
+      });
+    }
+
+    let mouseNormX = 0, mouseNormY = 0;
+    window.addEventListener("mousemove", (e) => {
+      mouseNormX = (e.clientX - window.innerWidth / 2) * 0.0003;
+      mouseNormY = (e.clientY - window.innerHeight / 2) * 0.0003;
+    });
+
+    function render3DParticles() {
+      pCtx.clearRect(0, 0, pWidth, pHeight);
+
+      const fov = 650;
+      const cx = pWidth / 2;
+      const cy = pHeight / 2;
+
+      const cosY = Math.cos(mouseNormX);
+      const sinY = Math.sin(mouseNormX);
+      const cosX = Math.cos(mouseNormY);
+      const sinX = Math.sin(mouseNormY);
+
+      const isAlert = dashboardState && dashboardState.metrics && dashboardState.metrics.queue_alert_active;
+      const nodeRgb = isAlert ? "255, 42, 85" : "198, 248, 6";
+
+      // Project 3D points to 2D screen
+      const projected = particles.map(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.z += p.vz;
+        if (p.x < -800) p.x = 800;
+        if (p.x > 800) p.x = -800;
+        if (p.y < -600) p.y = 600;
+        if (p.y > 600) p.y = -600;
+        if (p.z < 100) p.z = 1000;
+        if (p.z > 1000) p.z = 100;
+
+        // 3D rotation with mouse parallax
+        const x1 = p.x * cosY - p.z * sinY;
+        const z1 = p.z * cosY + p.x * sinY;
+        const y1 = p.y * cosX - z1 * sinX;
+        const z2 = z1 * cosX + p.y * sinX;
+
+        const scale = fov / (fov + z2);
+        const sx = cx + x1 * scale;
+        const sy = cy + y1 * scale;
+        const alpha = Math.max(0.12, Math.min(0.75, (1 - z2 / 1100)));
+        return { sx, sy, scale, alpha, z: z2 };
+      });
+
+      // Draw connection vectors between close nodes
+      for (let i = 0; i < projected.length; i++) {
+        for (let j = i + 1; j < projected.length; j++) {
+          const dx = projected[i].sx - projected[j].sx;
+          const dy = projected[i].sy - projected[j].sy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 110) {
+            const lineAlpha = (1 - dist / 110) * 0.2 * projected[i].alpha;
+            pCtx.strokeStyle = `rgba(${nodeRgb}, ${lineAlpha})`;
+            pCtx.lineWidth = 1;
+            pCtx.beginPath();
+            pCtx.moveTo(projected[i].sx, projected[i].sy);
+            pCtx.lineTo(projected[j].sx, projected[j].sy);
+            pCtx.stroke();
+          }
+        }
+      }
+
+      // Draw particle nodes
+      projected.forEach(p => {
+        pCtx.fillStyle = `rgba(${nodeRgb}, ${p.alpha})`;
+        pCtx.beginPath();
+        pCtx.arc(p.sx, p.sy, p.scale * 2.2, 0, Math.PI * 2);
+        pCtx.fill();
+      });
+
+      requestAnimationFrame(render3DParticles);
+    }
+    render3DParticles();
+  }
+
+  // ============================================================================
+  // 3D Card Mouse Parallax Tilt & Specular Lighting
+  // ============================================================================
+  function init3DCardParallax() {
+    const tiltCards = document.querySelectorAll(".royal-blue-card, .value-item, .submission-card-full, .clean-box");
+
+    tiltCards.forEach(card => {
+      card.addEventListener("mousemove", (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = ((y - centerY) / centerY) * -6.5;
+        const rotateY = ((x - centerX) / centerX) * 6.5;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.015, 1.015, 1.015)`;
+      });
+
+      card.addEventListener("mouseleave", () => {
+        card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)";
+      });
+    });
+  }
+
   // Animation Loop
   function loop() {
     drawStoreMap();
@@ -846,6 +1366,8 @@ pipegen compile \\
 
   // Start polling & animation
   renderStage("stage-1");
+  init3DParticleBackground();
+  init3DCardParallax();
   setInterval(fetchState, 350);
   setInterval(fetchTelemetry, 600);
   fetchState();

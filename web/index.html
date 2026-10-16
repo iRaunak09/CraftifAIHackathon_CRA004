@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body class="tech-dark-theme">
+  <!-- Interactive 3D Ambient Particle Constellation Canvas -->
+  <canvas id="bg-particle-canvas" class="bg-particle-canvas"></canvas>
 
   <!-- Main Navigation Bar -->
   <header class="main-nav">
@@ -79,7 +81,7 @@
 
     <!-- Right Column: Striking Royal Blue Feature Block -->
     <div class="hero-right">
-      <div class="royal-blue-card">
+      <div class="royal-blue-card" id="cockpit-card">
         <!-- Floating Neon Lime Circular Badge -->
         <div class="floating-lime-circle" id="circle-badge" title="Live Perception Streaming">
           <span class="circle-txt">LIVE<br>60 FPS<br>↗</span>
@@ -90,6 +92,9 @@
             <span class="stream-pill" id="stream-label">CAMERA 01: OVERHEAD STORE TRACKER</span>
             <button class="btn-source-toggle" id="btn-toggle-camera" title="Switch between Synthetic Store Tracker and Live USB/Webcam">
               📷 Switch to USB / Live Cam
+            </button>
+            <button class="btn-3d-toggle" id="btn-toggle-3d" title="Switch between 2D Overhead Plan and 3D Isometric Digital Twin View">
+              🧊 3D Digital Twin
             </button>
           </div>
           <div class="stream-toggles">
