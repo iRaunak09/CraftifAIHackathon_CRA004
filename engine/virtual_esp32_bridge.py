@@ -26,9 +26,16 @@ class VirtualESP32Bridge:
         self.running = True
         self._lock = threading.RLock()
         
-        # Initial boot log
-        self._log("BOOT", "ESP32-S3 WROOM-1 bootloader v1.4.2 init complete.")
-        self._log("FIRMGEN", "FirmGen v0.4.1 runtime loaded. PRD Traceability ID: PRD-RETAIL-001")
+        self.mac_address = "A4:CF:12:34:56:9B"
+        self.ble_name = f"FirmGen_{self.mac_address.split(':')[-1]}"
+        self.ble_advertising = True
+        
+        # Initial boot log strictly matching ESP32_BLE_FirmGen_Simple_PRD.pdf
+        self._log("BOOT", "ESP32-S3 WROOM-1 bootloader v1.4.2 init complete. UART baud: 115200 8N1.")
+        self._log("FIRMGEN", "FirmGen v0.4.1 runtime loaded. Active PRD: ESP32_BLE_FirmGen_Simple_PRD.pdf")
+        self._log("MAC", f"Detected MAC address: {self.mac_address}")
+        self._log("BLE", f"Generated BLE device name: {self.ble_name}")
+        self._log("BLE", "BLE advertising started successfully. Continuous advertising active.")
         self._log("WIFI", "Connected to AP 'RetailStore_Mesh_5G'. IP: 192.168.1.144")
         self._log("MQTT", "Subscribed to topic 'retail/store1/events'. Broker: Connected.")
         self._log("GPIO", "Configured GPIO 18 (OUTPUT/STROBE), GPIO 19 (LEDC/BUZZER), GPIO 21 (OUTPUT/STATUS)")
@@ -83,6 +90,9 @@ class VirtualESP32Bridge:
                 "free_heap_bytes": self.free_heap_bytes,
                 "uptime_seconds": self.uptime_seconds,
                 "active_alerts_count": self.active_alerts_count,
+                "mac_address": self.mac_address,
+                "ble_name": self.ble_name,
+                "ble_advertising": self.ble_advertising,
                 "recent_logs": list(self.telemetry_history)[-15:]
             }
 
