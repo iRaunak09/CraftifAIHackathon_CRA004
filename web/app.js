@@ -576,8 +576,8 @@ pipegen compile \\
     ctx.fill();
 
     ctx.fillStyle = "#C6F806";
-    ctx.font = "bold 9px 'JetBrains Mono', monospace";
-    ctx.fillText("CAM-01 [OVERHEAD GIE]", sensorCam.x - 55, sensorCam.y - 12);
+    ctx.font = "bold 12px 'JetBrains Mono', monospace";
+    ctx.fillText("CAM-01 [OVERHEAD GIE]", sensorCam.x - 65, sensorCam.y - 14);
     ctx.restore();
 
     // 3. Promotional Aisle (3D Extruded Shelves)
@@ -599,8 +599,8 @@ pipegen compile \\
       ctx.stroke();
 
       ctx.fillStyle = "#93c5fd";
-      ctx.font = "bold 11px 'Plus Jakarta Sans', sans-serif";
-      ctx.fillText("3D PROMOTIONAL AISLE (HEAT ZONE)", z0.x + 10, z0.y + 16);
+      ctx.font = "bold 13.5px 'Plus Jakarta Sans', sans-serif";
+      ctx.fillText("3D PROMOTIONAL AISLE (HEAT ZONE)", z0.x + 10, z0.y + 18);
       ctx.restore();
 
       // Extrude 3D Shelves inside aisle
@@ -657,7 +657,7 @@ pipegen compile \\
 
       // Floating 3D Zone Tag
       ctx.fillStyle = qColor;
-      ctx.font = "bold 12px 'Plus Jakarta Sans', sans-serif";
+      ctx.font = "bold 14px 'Plus Jakarta Sans', sans-serif";
       const labelPt = projectIso(630, 240, 75);
       const qTxt = isQueueAlert 
         ? `🚨 3D QUEUE OVERFLOW (${qCount} Waiting • SLA Alert)`
@@ -668,10 +668,10 @@ pipegen compile \\
       // 3D Cashier Registers
       [270, 380, 490].forEach((ry, idx) => {
         draw3DCuboid(1020, ry, 90, 40, 44, "#1E232F", "#848E9F", 0.35);
-        const regTop = projectIso(1020 + 45, ry + 20, 50);
+        const regTop = projectIso(1020 + 45, ry + 20, 52);
         ctx.fillStyle = "#FFFFFF";
-        ctx.font = "9px 'JetBrains Mono', monospace";
-        ctx.fillText(`REG ${idx + 1}`, regTop.x - 14, regTop.y - 2);
+        ctx.font = "bold 11px 'JetBrains Mono', monospace";
+        ctx.fillText(`REG ${idx + 1}`, regTop.x - 18, regTop.y);
       });
     }
 
@@ -695,7 +695,7 @@ pipegen compile \\
       // Animated 3D Floating UP Chevrons
       const inShift = (animTick * 12) % 30;
       ctx.fillStyle = "#C6F806";
-      ctx.font = "bold 11px 'JetBrains Mono', monospace";
+      ctx.font = "bold 13px 'JetBrains Mono', monospace";
       for (let ax = 100; ax < 320; ax += 50) {
         const floatZ = 12 + Math.sin(animTick + ax) * 4;
         const arrowPt = projectIso(ax, tripwireY - inShift, floatZ);
@@ -763,54 +763,54 @@ pipegen compile \\
         // 3D Extruded Wireframe Cuboid (Height Z = 60)
         draw3DCuboid(cx - 12, cy - 12, 24, 24, 60, customerColor, customerColor, 0.22);
 
-        // Hovering 3D ID Pill Tag at Z = 78
-        const tagPt = projectIso(cx, cy, 78);
-        ctx.fillStyle = "#0A0B0E";
-        ctx.fillRect(tagPt.x - 22, tagPt.y - 12, 44, 14);
+        // Hovering 3D ID Pill Tag with dynamic vertical staggering (Z offset) to prevent overlapping tags
+        const tagZ = 76 + (c.id % 4) * 20;
+        const tagPt = projectIso(cx, cy, tagZ);
+        
+        const pillW = c.in_queue ? 68 : 52;
+        const pillH = 18;
+        ctx.fillStyle = "rgba(10, 11, 14, 0.94)";
+        ctx.fillRect(tagPt.x - pillW / 2, tagPt.y - pillH / 2, pillW, pillH);
         ctx.strokeStyle = customerColor;
-        ctx.lineWidth = 1;
-        ctx.strokeRect(tagPt.x - 22, tagPt.y - 12, 44, 14);
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(tagPt.x - pillW / 2, tagPt.y - pillH / 2, pillW, pillH);
 
         ctx.fillStyle = customerColor;
-        ctx.font = "bold 9px 'JetBrains Mono', monospace";
+        ctx.font = "bold 11px 'JetBrains Mono', monospace";
         ctx.textAlign = "center";
-        ctx.fillText(`ID:${c.id}`, tagPt.x, tagPt.y - 2);
-
-        // Dwell Timer if in queue
-        if (c.in_queue) {
-          ctx.fillStyle = "#C6F806";
-          ctx.fillText(`${Math.round(c.dwell_time)}s`, tagPt.x, tagPt.y + 11);
-        }
+        const tagText = c.in_queue ? `#${c.id} ${Math.round(c.dwell_time)}s` : `#${c.id}`;
+        ctx.fillText(tagText, tagPt.x, tagPt.y + 4);
         ctx.textAlign = "left";
         ctx.restore();
       });
     }
 
     // Top-Left Cybernetic 3D HUD Watermark
-    ctx.fillStyle = "rgba(10, 11, 14, 0.85)";
-    ctx.fillRect(16, 14, 460, 32);
-    ctx.strokeStyle = "rgba(198, 248, 6, 0.35)";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(16, 14, 460, 32);
+    ctx.fillStyle = "rgba(10, 11, 14, 0.92)";
+    ctx.fillRect(16, 12, 490, 38);
+    ctx.strokeStyle = "rgba(198, 248, 6, 0.5)";
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(16, 12, 490, 38);
     ctx.fillStyle = "#C6F806";
     ctx.beginPath();
-    ctx.arc(32, 30, 4, 0, Math.PI * 2);
+    ctx.arc(32, 31, 5, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = "#FFFFFF";
-    ctx.font = "bold 11px 'JetBrains Mono', monospace";
-    ctx.fillText("CAM-01: 3D ISOMETRIC DIGITAL TWIN", 44, 34);
-    ctx.fillStyle = "#848E9F";
-    ctx.font = "10px 'JetBrains Mono', monospace";
-    ctx.fillText("3D FRUSTUM • 60 FPS • TRT FP16", 280, 34);
+    ctx.font = "bold 13.5px 'JetBrains Mono', monospace";
+    ctx.fillText("CAM-01: 3D ISOMETRIC DIGITAL TWIN", 48, 36);
+    ctx.fillStyle = "#A3B1CC";
+    ctx.font = "bold 11.5px 'JetBrains Mono', monospace";
+    ctx.fillText("3D FRUSTUM • 60 FPS • TRT FP16", 300, 36);
 
     // Top-Right Live Timecode
-    ctx.fillStyle = "rgba(10, 11, 14, 0.85)";
-    ctx.fillRect(canvas.width - 240, 14, 224, 32);
-    ctx.strokeStyle = "rgba(36, 107, 253, 0.35)";
-    ctx.strokeRect(canvas.width - 240, 14, 224, 32);
+    ctx.fillStyle = "rgba(10, 11, 14, 0.92)";
+    ctx.fillRect(canvas.width - 250, 12, 234, 38);
+    ctx.strokeStyle = "rgba(36, 107, 253, 0.5)";
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(canvas.width - 250, 12, 234, 38);
     ctx.fillStyle = "#246BFD";
-    ctx.font = "bold 10px 'JetBrains Mono', monospace";
-    ctx.fillText(`3D REC // ${new Date().toLocaleTimeString()}`, canvas.width - 228, 34);
+    ctx.font = "bold 12px 'JetBrains Mono', monospace";
+    ctx.fillText(`3D REC // ${new Date().toLocaleTimeString()}`, canvas.width - 236, 36);
   }
 
   // 2D Overhead Drawing Routine
@@ -832,31 +832,32 @@ pipegen compile \\
     }
 
     // High-Tech Cybernetic Canvas HUD Header
-    ctx.fillStyle = "rgba(10, 11, 14, 0.85)";
-    ctx.fillRect(16, 14, 430, 32);
-    ctx.strokeStyle = "rgba(198, 248, 6, 0.3)";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(16, 14, 430, 32);
+    ctx.fillStyle = "rgba(10, 11, 14, 0.92)";
+    ctx.fillRect(16, 12, 470, 38);
+    ctx.strokeStyle = "rgba(198, 248, 6, 0.5)";
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(16, 12, 470, 38);
     ctx.fillStyle = "#C6F806";
     ctx.beginPath();
-    ctx.arc(32, 30, 4, 0, Math.PI * 2);
+    ctx.arc(32, 31, 5, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = "#FFFFFF";
-    ctx.font = "bold 11px 'JetBrains Mono', monospace";
-    ctx.fillText("CAM-01: OVERHEAD STORE SENTINEL", 44, 34);
-    ctx.fillStyle = "#848E9F";
-    ctx.font = "10px 'JetBrains Mono', monospace";
-    ctx.fillText("NVDEC • 60 FPS • TRT FP16", 265, 34);
+    ctx.font = "bold 13.5px 'JetBrains Mono', monospace";
+    ctx.fillText("CAM-01: OVERHEAD STORE SENTINEL", 48, 36);
+    ctx.fillStyle = "#A3B1CC";
+    ctx.font = "bold 11.5px 'JetBrains Mono', monospace";
+    ctx.fillText("NVDEC • 60 FPS • TRT FP16", 280, 36);
 
     // Timestamp & Model Watermark (Top Right)
-    ctx.fillStyle = "rgba(10, 11, 14, 0.85)";
-    ctx.fillRect(canvas.width - 240, 14, 224, 32);
-    ctx.strokeStyle = "rgba(36, 107, 253, 0.3)";
-    ctx.strokeRect(canvas.width - 240, 14, 224, 32);
+    ctx.fillStyle = "rgba(10, 11, 14, 0.92)";
+    ctx.fillRect(canvas.width - 250, 12, 234, 38);
+    ctx.strokeStyle = "rgba(36, 107, 253, 0.5)";
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(canvas.width - 250, 12, 234, 38);
     ctx.fillStyle = "#246BFD";
-    ctx.font = "bold 10px 'JetBrains Mono', monospace";
+    ctx.font = "bold 12px 'JetBrains Mono', monospace";
     const timeStr = new Date().toLocaleTimeString();
-    ctx.fillText(`REC // ${timeStr} • YOLOv8x`, canvas.width - 228, 34);
+    ctx.fillText(`REC // ${timeStr} • YOLOv8x`, canvas.width - 236, 36);
 
     if (chkZones && chkZones.checked) {
       // 1. Promotional Aisle Area (Subtle Glow Overlay)
@@ -866,8 +867,8 @@ pipegen compile \\
       ctx.fillRect(100, 150, 420, 320);
       ctx.strokeRect(100, 150, 420, 320);
       ctx.fillStyle = "#CBD5E1";
-      ctx.font = "bold 12px 'Plus Jakarta Sans', sans-serif";
-      ctx.fillText("PROMOTIONAL AISLE (HEAT ZONE)", 115, 175);
+      ctx.font = "bold 14px 'Plus Jakarta Sans', sans-serif";
+      ctx.fillText("PROMOTIONAL AISLE (HEAT ZONE)", 115, 178);
 
       // Shelves inside aisle
       ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
@@ -909,18 +910,18 @@ pipegen compile \\
         ctx.fillRect(1020, ry, 90, 40);
         ctx.strokeRect(1020, ry, 90, 40);
         ctx.fillStyle = "#FFFFFF";
-        ctx.font = "10px 'JetBrains Mono', monospace";
+        ctx.font = "bold 11px 'JetBrains Mono', monospace";
         ctx.fillText(`REGISTER ${idx + 1}`, 1030, ry + 25);
         ctx.fillStyle = "#12151C";
       });
 
       // Status Tag
       ctx.fillStyle = isQueueAlert ? "#FF2A55" : "#C6F806";
-      ctx.font = "bold 13px 'Plus Jakarta Sans', sans-serif";
+      ctx.font = "bold 14px 'Plus Jakarta Sans', sans-serif";
       const queueTitle = isQueueAlert 
         ? `🚨 CHECKOUT QUEUE OVERFLOW (${qCount} Waiting • SLA Exceeded)`
         : `CHECKOUT QUEUE ROI (${qCount} Waiting • Nominal Flow)`;
-      ctx.fillText(queueTitle, 650, 270);
+      ctx.fillText(queueTitle, 650, 272);
     }
 
     // 3. Entrance & Exit Tripwires (Bi-directional animated chevrons)
@@ -939,12 +940,12 @@ pipegen compile \\
       // Animated UP Chevrons for Entrance [IN]
       const inArrowShift = (animTick * 10) % 30;
       ctx.fillStyle = "#C6F806";
-      ctx.font = "bold 10px 'JetBrains Mono', monospace";
+      ctx.font = "bold 12px 'JetBrains Mono', monospace";
       for (let ax = 100; ax < 320; ax += 45) {
         const arrowY = tripwireY - 8 - ((inArrowShift + ax) % 18);
         ctx.fillText("▲", ax, arrowY);
       }
-      ctx.fillText("ENTRANCE [IN] TRIPWIRE", 90, tripwireY + 18);
+      ctx.fillText("ENTRANCE [IN] TRIPWIRE", 90, tripwireY + 20);
 
       // Right Segment: Exit [OUT] (Electric Blue)
       ctx.strokeStyle = "#246BFD";
@@ -962,7 +963,7 @@ pipegen compile \\
         const arrowY = tripwireY + 12 + ((outArrowShift + bx) % 18);
         ctx.fillText("▼", bx, arrowY);
       }
-      ctx.fillText("EXIT [OUT] TRIPWIRE", 370, tripwireY - 8);
+      ctx.fillText("EXIT [OUT] TRIPWIRE", 370, tripwireY - 10);
     }
 
     // 4. Render Active Tracked Customers with Cybernetic Reticles
@@ -1024,24 +1025,31 @@ pipegen compile \\
         ctx.arc(cx, cy, 2, 0, Math.PI * 2);
         ctx.fill();
 
-        // Tag label pill (PDF Section 3: PERSON 01 — 96%)
-        const pillW = 94;
-        ctx.fillStyle = "#0A0B0E";
-        ctx.fillRect(bx, by - 16, pillW, 14);
+        // Tag label pill with vertical staggering to avoid overlapping
+        const pillW = 104;
+        const pillH = 18;
+        const tagY = by - 22 - (c.id % 3) * 16;
+        ctx.fillStyle = "rgba(10, 11, 14, 0.94)";
+        ctx.fillRect(bx - 10, tagY, pillW, pillH);
         ctx.strokeStyle = customerColor;
-        ctx.lineWidth = 1;
-        ctx.strokeRect(bx, by - 16, pillW, 14);
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(bx - 10, tagY, pillW, pillH);
 
         ctx.fillStyle = customerColor;
-        ctx.font = "bold 9px 'JetBrains Mono', monospace";
+        ctx.font = "bold 11px 'JetBrains Mono', monospace";
         const personIdStr = String(c.id).padStart(2, "0");
-        ctx.fillText(`PERSON ${personIdStr} — 96%`, bx + 4, by - 6);
+        ctx.fillText(`PERSON ${personIdStr} — 96%`, bx - 4, tagY + 13);
 
         // Dwell Timer if in queue
         if (c.in_queue) {
+          ctx.fillStyle = "rgba(10, 11, 14, 0.94)";
+          ctx.fillRect(bx - 4, by + bh + 4, 38, 16);
+          ctx.strokeStyle = "#C6F806";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(bx - 4, by + bh + 4, 38, 16);
           ctx.fillStyle = "#C6F806";
-          ctx.font = "bold 9px 'JetBrains Mono', monospace";
-          ctx.fillText(`${Math.round(c.dwell_time)}s`, bx + 2, by + bh + 11);
+          ctx.font = "bold 11px 'JetBrains Mono', monospace";
+          ctx.fillText(`${Math.round(c.dwell_time)}s`, bx + 2, by + bh + 16);
         }
       });
     }
