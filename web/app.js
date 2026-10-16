@@ -263,18 +263,33 @@ pipegen compile \\
     });
   });
 
-  // Switch Editorial Main Tabs
-  document.querySelectorAll(".editorial-tab, .tab-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".editorial-tab, .tab-btn").forEach(b => b.classList.remove("active"));
-      document.querySelectorAll(".editorial-tab-body, .tab-content").forEach(c => c.classList.remove("active"));
-      btn.classList.add("active");
-      const targetId = btn.getAttribute("data-tab");
-      const targetContent = document.getElementById(targetId);
-      if (targetContent) targetContent.classList.add("active");
-      if (targetId === "tab-stages" || targetId === "tab-pipegen") renderStage(activeStage);
+  // Active Navigation Link Handling & Scroll Spy
+  document.querySelectorAll(".nav-item").forEach(link => {
+    link.addEventListener("click", () => {
+      document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
+      link.classList.add("active");
     });
   });
+
+  if ("IntersectionObserver" in window) {
+    const navSections = document.querySelectorAll("section[id]");
+    const navObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute("id");
+          document.querySelectorAll(".nav-item").forEach(link => {
+            if (link.getAttribute("href") === `#${id}`) {
+              link.classList.add("active");
+            } else {
+              link.classList.remove("active");
+            }
+          });
+        }
+      });
+    }, { threshold: 0.35 });
+
+    navSections.forEach(sec => navObserver.observe(sec));
+  }
 
   // Spike Crowd Rush Button
   btnSpike.addEventListener("click", async () => {

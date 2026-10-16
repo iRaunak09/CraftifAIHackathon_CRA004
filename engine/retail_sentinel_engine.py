@@ -34,8 +34,8 @@ class CustomerTrack:
 
         # Behavior based on target zone
         if self.target_zone == "entrance":
-            self.y += 1.8 * 60 * dt
-            if self.y > 750:
+            self.y -= 1.8 * 60 * dt
+            if self.y < 750:
                 self.target_zone = random.choice(["aisle", "queue"])
         elif self.target_zone == "aisle":
             # Wander gently around aisles (X: 150-750, Y: 250-700)

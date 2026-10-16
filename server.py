@@ -65,6 +65,8 @@ class OmniRetailHandler(SimpleHTTPRequestHandler):
                 buf = io.BytesIO()
                 with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zipf:
                     for root, _, files in os.walk(ROOT_DIR):
+                        if ".git" in root or "__pycache__" in root:
+                            continue
                         for file in files:
                             if file.endswith((".py", ".json", ".md", ".txt", ".sh", ".html", ".css", ".js", ".c", ".h")) or file == "CMakeLists.txt":
                                 abs_path = os.path.join(root, file)
