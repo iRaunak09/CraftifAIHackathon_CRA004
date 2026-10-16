@@ -1,0 +1,26 @@
+# DeepStream NvInfer Primary GIE Configuration
+[property]
+gpu-id=0
+net-scale-factor=0.0039215697906911373
+model-color-format=0
+onnx-file=../models/yolov8x_retail_640.onnx
+model-engine-file=../models/yolov8x_retail_fp16.engine
+labelfile-path=../models/labels.txt
+batch-size=1
+network-mode=2
+num-detected-classes=4
+interval=0
+gie-unique-id=1
+process-mode=1
+network-type=0
+cluster-mode=2
+maintain-aspect-ratio=1
+symmetric-padding=1
+workspace-size=2048
+parse-bbox-func-name=NvDsInferParseCustomYoloV8
+custom-lib-path=/opt/nvidia/deepstream/deepstream/lib/libnvds_infercustomparser.so
+
+[class-attrs-all]
+pre-cluster-threshold=0.45
+topk=100
+nms-iou-threshold=0.5

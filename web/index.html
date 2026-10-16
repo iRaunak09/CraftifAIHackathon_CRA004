@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniRetail Sentinel — CraftifAI PipeGen Physical AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="tech-dark-theme">
+
+  <!-- Top Dark Ticker Strip -->
+  <div class="top-ticker">
+    <div class="ticker-left">
+      <span class="ticker-dot"></span>
+      <span class="ticker-text">HACKWITHBANGLORE 4.0 / EMBEDDED SF &bull; CRAFTIFAI PIPEGEN TRACK A</span>
+    </div>
+    <div class="ticker-right">
+      <span>BENGALURU, INDIA</span>
+      <span class="ticker-sep">&bull;</span>
+      <span>OFFICIAL SUBMISSION: OCT 16, 2026</span>
+    </div>
+  </div>
+
+  <!-- Main Navigation Bar -->
+  <header class="main-nav">
+    <div class="nav-brand-group">
+      <div class="brand-logo">OMNI.</div>
+      <div class="brand-subtext">
+        <span class="brand-sub-title">SENTINEL</span>
+        <span class="brand-sub-desc">PHYSICAL AI AUTOPILOT</span>
+      </div>
+    </div>
+
+    <nav class="nav-links">
+      <a href="#vision" class="nav-item active">Live Vision</a>
+      <a href="#stages" class="nav-item">5 Stages</a>
+      <a href="#telemetry" class="nav-item">ESP32 Telemetry</a>
+      <a href="#submission" class="nav-item">Submission</a>
+    </nav>
+
+    <div class="nav-action">
+      <a href="/api/download-submission-bundle" class="btn-nav-action" id="btn-export-bundle">
+        Export Package ↗
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Hero Grid -->
+  <section class="hero-container" id="overview">
+    <!-- Left Column: Typography & CTAs -->
+    <div class="hero-left">
+      <div class="hero-kicker">
+        <span class="kicker-dash">&mdash;</span>
+        <span class="kicker-label">YOUR PHYSICAL AI QUEUE AUTOPILOT</span>
+      </div>
+
+      <h1 class="hero-headline">
+        Built for<br>
+        the <span class="italic-serif-lime">physical</span><br>
+        store<span class="blue-dot">.</span>
+      </h1>
+
+      <p class="hero-desc">
+        Edge vision staples, ready for production deployment. Detect customers, track checkout queue dwell times, and actuate IoT cashier beacons—all compiled to TensorRT in one unified pipeline.
+      </p>
+
+      <div class="hero-cta-group">
+        <button class="btn-lime-pill" id="btn-spike-crowd">
+          Spike crowd rush ↗
+        </button>
+        <a href="#stages" class="btn-ghost-pill">
+          Get to know us &darr;
+        </a>
+      </div>
+
+      <!-- Trust Badges Strip (3 circles like JS Collections) -->
+      <div class="hero-trust-strip">
+        <div class="trust-avatars">
+          <span class="avatar-pill av-1">60</span>
+          <span class="avatar-pill av-2">4.8</span>
+          <span class="avatar-pill av-3">TRT</span>
+        </div>
+        <div class="trust-caption">
+          <strong>NVIDIA TensorRT 10.3 + DeepStream.</strong>
+          <span>ESP32 Closed-Loop UART Linked.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Striking Royal Blue Feature Block -->
+    <div class="hero-right">
+      <div class="royal-blue-card">
+        <!-- Floating Neon Lime Circular Badge -->
+        <div class="floating-lime-circle" id="circle-badge" title="Live Perception Streaming">
+          <span class="circle-txt">LIVE<br>60 FPS<br>↗</span>
+        </div>
+
+        <div class="blue-card-header">
+          <div class="header-left-cluster">
+            <span class="stream-pill" id="stream-label">CAMERA 01: OVERHEAD STORE TRACKER</span>
+            <button class="btn-source-toggle" id="btn-toggle-camera" title="Switch between Synthetic Store Tracker and Live USB/Webcam">
+              📷 Switch to USB / Live Cam
+            </button>
+          </div>
+          <div class="stream-toggles">
+            <label class="toggle-pill">
+              <input type="checkbox" id="chk-trails" checked> Trails
+            </label>
+            <label class="toggle-pill">
+              <input type="checkbox" id="chk-zones" checked> ROI Zones
+            </label>
+            <label class="toggle-pill">
+              <input type="checkbox" id="chk-tripwire" checked> Tripwire
+            </label>
+          </div>
+        </div>
+
+        <!-- The Vision Canvas inside the Blue Card -->
+        <div class="canvas-box">
+          <video id="webcam-feed" playsinline autoplay muted style="display:none;"></video>
+          <canvas id="vision-canvas" width="1280" height="720"></canvas>
+          
+          <!-- Alert Toast inside Blue Box -->
+          <div class="blue-alert-toast" id="action-banner">
+            <span class="toast-bell">🚨</span>
+            <div class="toast-txt">
+              <strong>QUEUE CONGESTION ALERT</strong>
+              <span>5+ customers in line. Actuating Register #2 &amp; ESP32 Strobe!</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Blue Card Footer -->
+        <div class="blue-card-footer">
+          <span class="footer-index">01 / 02</span>
+          <span class="footer-caption">THE AUTONOMOUS STORE VIEW &bull; CRAFTIFAI PIPEGEN v0.5.1</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Numbered Value Propositions Strip (Matching JS Collections 01, 02, 03) -->
+  <section class="value-strip">
+    <div class="value-item" id="card-occupancy">
+      <span class="val-num">01 &mdash; TRIPWIRE IN/OUT COUNTING</span>
+      <div class="val-big-row">
+        <span class="val-metric" id="kpi-occupancy">24</span>
+        <span class="val-unit">/ 60 OCCUPANCY</span>
+      </div>
+      <p class="val-sub">In: <strong id="kpi-in">142</strong> &bull; Out: <strong id="kpi-out">118</strong> customers.</p>
+    </div>
+
+    <div class="value-item" id="card-queue">
+      <span class="val-num">02 &mdash; REAL-TIME QUEUE CONGESTION</span>
+      <div class="val-big-row">
+        <span class="val-metric" id="kpi-queue-count">3</span>
+        <span class="val-badge badge-normal" id="queue-badge">NORMAL</span>
+      </div>
+      <p class="val-sub" id="queue-status-text">Flow steady. No backup registers needed.</p>
+    </div>
+
+    <div class="value-item" id="card-wait">
+      <span class="val-num">03 &mdash; DWELL TIME SLA AUTOPILOT</span>
+      <div class="val-big-row">
+        <span class="val-metric" id="kpi-wait-time">33.0</span>
+        <span class="val-unit">SECONDS WAIT</span>
+      </div>
+      <p class="val-sub">Active Registers: <strong id="kpi-registers">2</strong> &bull; Target &lt; 45s</p>
+    </div>
+
+    <div class="value-item" id="card-hardware">
+      <span class="val-num">04 &mdash; CLOSED-LOOP HARDWARE ACTUATOR</span>
+      <div class="val-big-row">
+        <span class="val-chip led-off" id="hw-strobe-val">STROBE: OFF</span>
+        <span class="val-chip buzzer-off" id="hw-buzzer-val">BUZZER: SILENT</span>
+      </div>
+      <p class="val-sub">ESP32 Heap: <code id="hw-heap">294,816 B</code> &bull; UART Linked</p>
+    </div>
+  </section>
+
+  <!-- PipeGen 5-Stage Showcase (Styled like Brand Cards) -->
+  <section class="stages-showcase" id="stages">
+    <div class="section-title-wrap">
+      <span class="sub-label">&mdash; CRAFTIFAI PIPEGEN ARCHITECTURE</span>
+      <h2 class="title-bold">The Five-Stage Lifecycle.</h2>
+      <p class="desc-muted">From plain-English requirement to TensorRT compiled DeepStream execution.</p>
+    </div>
+
+    <div class="stages-tab-bar">
+      <button class="stage-pill active" data-stage="stage-1">1. Requirement</button>
+      <button class="stage-pill" data-stage="stage-2">2. Pipeline IR</button>
+      <button class="stage-pill" data-stage="stage-3">3. Model Config</button>
+      <button class="stage-pill" data-stage="stage-4">4. Compiler</button>
+      <button class="stage-pill" data-stage="stage-5">5. TensorRT Report</button>
+    </div>
+
+    <div class="stage-card-frame">
+      <div class="stage-code-box" id="stage-display">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Live Telemetry & Events Grid -->
+  <section class="telemetry-showcase" id="telemetry">
+    <div class="telemetry-split-grid">
+      <!-- Left: Real-time Event Stream -->
+      <div class="clean-box">
+        <div class="box-head">
+          <div>
+            <span class="box-tag">&mdash; REAL-TIME MQTT FEED</span>
+            <h3>Actionable Dispatch Log</h3>
+          </div>
+          <a href="/api/export-events-jsonl" class="btn-micro-export" download title="Download raw newline-delimited JSON events">
+            Export JSONL ↗
+          </a>
+        </div>
+        <div class="events-flow" id="events-feed">
+          <!-- Events rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Right: ESP32 Hardware Console -->
+      <div class="clean-box dark-console">
+        <div class="box-head">
+          <div class="console-head-left">
+            <span class="console-chip">ESP32-S3 UART</span>
+            <h3>Hardware RTOS Telemetry</h3>
+          </div>
+          <button class="btn-ping-micro" id="btn-test-ping">Send Ping</button>
+        </div>
+        <div class="console-lines" id="uart-terminal">
+          <!-- Terminal logs rendered dynamically -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Official Hackathon Submission Hub -->
+  <section class="submission-showcase" id="submission">
+    <div class="submission-card-full">
+      <div class="sub-card-left">
+        <span class="sub-tag">&mdash; HACKWITHBANGLORE 4.0 SUBMISSION</span>
+        <h2 class="sub-head">Everything is ready to submit.</h2>
+        <p class="sub-para">
+          Built for Track A (PipeGen Perception) with the <strong>Closed-Loop Hardware Bonus</strong> and <strong>Edge Optimization Bonus</strong>. Complete PRD, DeepStream GStreamer pipeline, TensorRT benchmarks, and ESP32 UART bridge.
+        </p>
+        <div class="sub-btn-row">
+          <a href="/api/download-submission-bundle" class="btn-lime-pill">
+            Download Package (.zip) ↗
+          </a>
+          <a href="https://forms.gle/eJyeCKCG2UH757QZ8" target="_blank" class="btn-ghost-pill">
+            Open Google Form ↗
+          </a>
+        </div>
+      </div>
+      <div class="sub-card-right">
+        <div class="metrics-summary-table">
+          <div class="metric-line">
+            <span>Inference Latency:</span>
+            <strong>4.88 ms (FP16)</strong>
+          </div>
+          <div class="metric-line">
+            <span>Peak Throughput:</span>
+            <strong>204.9 FPS</strong>
+          </div>
+          <div class="metric-line">
+            <span>INT8 Quantization:</span>
+            <strong>2.76 ms / 362 FPS</strong>
+          </div>
+          <div class="metric-line">
+            <span>Power Envelope:</span>
+            <strong>14.8 W (Jetson Ready)</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Clean Minimal Footer -->
+  <footer class="clean-footer">
+    <div class="footer-inner">
+      <div class="f-left">
+        <strong>OMNIRETAIL SENTINEL</strong> &bull; CRAFTIFAI PHYSICAL AI
+      </div>
+      <div class="f-center">
+        <span>Bengaluru, India &bull; HackwithBangalore 4.0</span>
+      </div>
+      <div class="f-right">
+        <a href="/api/download-submission-bundle">OmniRetail_PipeGen_Submission.zip &darr;</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating Green Pill (Matching "Let's talk" from screenshot) -->
+  <div class="floating-status-pill" id="live-status-pill">
+    <span class="status-green-dot"></span>
+    <span>Live Sentinel Active</span>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

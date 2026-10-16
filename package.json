@@ -1,0 +1,12 @@
+{
+  "name": "omniretail-sentinel",
+  "version": "1.0.0",
+  "description": "OmniRetail AI: Autonomous Edge Store & Queue Sentinel with CraftifAI PipeGen",
+  "scripts": {
+    "dev": "python3 server.py",
+    "start": "python3 server.py"
+  },
+  "keywords": ["physical-ai", "pipegen", "deepstream", "tensorrt", "retail-analytics"],
+  "author": "Raunak Bothra",
+  "license": "MIT"
+}
