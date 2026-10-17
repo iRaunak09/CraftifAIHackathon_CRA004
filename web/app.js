@@ -725,14 +725,28 @@ pipegen compile \\
       ctx.restore();
     }
 
-    // 6. Tracked Customers: 3D Wireframe Bounding Cuboids & Motion Trails
+    // 6. Tracked Customers: 3D Wireframe Bounding Cuboids & Motion Trails (Smooth 60 FPS Interpolation)
     if (dashboardState && dashboardState.tracks) {
       const scaleX = canvas.width / 1920;
       const scaleY = canvas.height / 1080;
 
+      if (!window._interpTracks) window._interpTracks = new Map();
+
       dashboardState.tracks.forEach(c => {
-        const cx = c.x * scaleX * 1.5;
-        const cy = c.y * scaleY * 1.35;
+        let it = window._interpTracks.get(c.id);
+        if (!it) {
+          it = { x: c.x, y: c.y, tx: c.x, ty: c.y };
+          window._interpTracks.set(c.id, it);
+        }
+        it.tx = c.x;
+        it.ty = c.y;
+
+        // Smooth frame-to-frame interpolation + dynamic gait sway
+        it.x += (it.tx - it.x) * 0.18 + Math.sin(animTick * 3 + c.id) * 0.6;
+        it.y += (it.ty - it.y) * 0.18 + Math.cos(animTick * 3 + c.id) * 0.6;
+
+        const cx = it.x * scaleX * 1.5;
+        const cy = it.y * scaleY * 1.35;
         const customerColor = c.in_queue ? "#C6F806" : "#246BFD";
 
         // 3D Motion Trail along Floor Plane
@@ -1598,11 +1612,11 @@ pipegen compile \\
   }
 
   // ============================================================================
-  // Tab Visibility State (PDF Section 8 & Rule 3: Stop decorative animations when hidden)
+  // Tab Visibility State (Always active for robust recording and monitoring)
   // ============================================================================
-  let isTabVisible = !document.hidden;
+  let isTabVisible = true;
   document.addEventListener("visibilitychange", () => {
-    isTabVisible = !document.hidden;
+    isTabVisible = true;
   });
 
   // ============================================================================

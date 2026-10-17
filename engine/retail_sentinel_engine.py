@@ -16,60 +16,59 @@ class CustomerTrack:
     def __init__(self, track_id, start_pos, target_zone="aisle"):
         self.track_id = track_id
         self.x, self.y = start_pos
-        self.vx = random.uniform(-1.5, 1.5)
-        self.vy = random.uniform(0.8, 2.2)
         self.target_zone = target_zone # 'entrance', 'aisle', 'queue', 'exiting'
         self.dwell_time = 0.0
-        self.in_queue = False
-        self.entered = False
+        self.in_queue = (target_zone == "queue")
+        self.entered = (start_pos[1] < 940)
         self.exited = False
-        self.width = 34
-        self.height = 70
-        self.color = "#00f0ff"
+        self.color = "#ffb703" if self.in_queue else "#00f0ff"
         self.history = deque(maxlen=20)
+        self.speed = random.uniform(85, 130)
+        self.target_x, self.target_y = self._pick_waypoint()
+        self.vx = 0.0
+        self.vy = 0.0
+
+    def _pick_waypoint(self):
+        if self.target_zone == "entrance":
+            return (random.uniform(220, 450), random.uniform(650, 750))
+        elif self.target_zone == "aisle":
+            return (random.uniform(180, 680), random.uniform(280, 640))
+        elif self.target_zone == "queue":
+            reg_y = random.choice([320, 440, 560]) # near register 1, 2, or 3
+            return (random.uniform(980, 1450), reg_y + random.uniform(-30, 30))
+        elif self.target_zone == "exiting":
+            return (random.uniform(380, 560), 1040)
+        return (self.x, self.y)
 
     def update(self, dt):
         self.dwell_time += dt
         self.history.append((self.x, self.y))
 
-        # Behavior based on target zone
-        if self.target_zone == "entrance":
-            self.y -= 1.8 * 60 * dt
-            if self.y < 750:
-                self.target_zone = random.choice(["aisle", "queue"])
-        elif self.target_zone == "aisle":
-            # Wander gently around aisles (X: 150-750, Y: 250-700)
-            self.x += self.vx * 40 * dt
-            self.y += self.vy * 40 * dt
-            if self.x < 160 or self.x > 740: self.vx *= -1
-            if self.y < 260 or self.y > 690: self.vy *= -1
-            if self.dwell_time > random.uniform(8.0, 18.0):
-                self.target_zone = "queue"
-        elif self.target_zone == "queue":
-            # Move towards checkout queue area (X: 1050-1550, Y: 450-800)
-            target_x = random.uniform(1050, 1550)
-            target_y = random.uniform(500, 780)
-            dx = target_x - self.x
-            dy = target_y - self.y
-            dist = math.hypot(dx, dy)
-            if dist > 15:
-                self.x += (dx / dist) * 60 * dt
-                self.y += (dy / dist) * 60 * dt
-            else:
-                self.x += random.uniform(-0.3, 0.3)
-                self.y += random.uniform(-0.3, 0.3)
-                if self.dwell_time > random.uniform(22.0, 35.0):
+        dx = self.target_x - self.x
+        dy = self.target_y - self.y
+        dist = math.hypot(dx, dy)
+
+        if dist > 8:
+            move_step = min(dist, self.speed * dt)
+            self.vx = (dx / dist) * self.speed
+            self.vy = (dy / dist) * self.speed
+            self.x += (dx / dist) * move_step
+            self.y += (dy / dist) * move_step
+        else:
+            # Reached waypoint -> transition behavior
+            if self.target_zone == "entrance":
+                self.target_zone = random.choice(["aisle", "aisle", "queue"])
+                self.target_x, self.target_y = self._pick_waypoint()
+            elif self.target_zone == "aisle":
+                if self.dwell_time > random.uniform(8.0, 16.0):
+                    self.target_zone = "queue"
+                    self.in_queue = True
+                self.target_x, self.target_y = self._pick_waypoint()
+            elif self.target_zone == "queue":
+                if self.dwell_time > random.uniform(18.0, 30.0):
                     self.target_zone = "exiting"
-        elif self.target_zone == "exiting":
-            # Move down towards exit
-            target_x = 350
-            target_y = 1000
-            dx = target_x - self.x
-            dy = target_y - self.y
-            dist = math.hypot(dx, dy)
-            if dist > 10:
-                self.x += (dx / dist) * 80 * dt
-                self.y += (dy / dist) * 80 * dt
+                    self.in_queue = False
+                self.target_x, self.target_y = self._pick_waypoint()
 
 class RetailSentinelEngine:
     def __init__(self):
@@ -87,27 +86,25 @@ class RetailSentinelEngine:
         self.inference_latency_ms = 4.88
         self.precision_mode = "FP16 (TensorRT)"
         
-        # Event log
         self.events_log = deque(maxlen=50)
         self.running = True
         self._lock = threading.RLock()
 
-        # Seed initial customers
         self._seed_initial_crowd()
         self.thread = threading.Thread(target=self._run_loop, daemon=True)
         self.thread.start()
 
     def _seed_initial_crowd(self):
-        for _ in range(12):
+        for _ in range(16):
             cid = self.next_track_id
             self.next_track_id += 1
             zone = random.choice(["aisle", "aisle", "queue", "entrance"])
             if zone == "queue":
-                pos = (random.uniform(1050, 1500), random.uniform(500, 750))
+                pos = (random.uniform(1050, 1450), random.uniform(320, 600))
             elif zone == "aisle":
-                pos = (random.uniform(200, 700), random.uniform(300, 650))
+                pos = (random.uniform(200, 680), random.uniform(280, 640))
             else:
-                pos = (random.uniform(250, 500), random.uniform(800, 920))
+                pos = (random.uniform(220, 420), random.uniform(820, 940))
             self.customers[cid] = CustomerTrack(cid, pos, target_zone=zone)
 
     def _emit_event(self, event_type, details):
@@ -121,8 +118,6 @@ class RetailSentinelEngine:
         }
         with self._lock:
             self.events_log.appendleft(event)
-        
-        # Forward to Virtual Hardware Bridge
         bridge.on_perception_event(event)
 
     def _run_loop(self):
@@ -130,90 +125,90 @@ class RetailSentinelEngine:
         last_spawn = time.time()
 
         while self.running:
-            now = time.time()
-            dt = min(now - last_time, 0.1)
-            last_time = now
+            try:
+                now = time.time()
+                dt = min(now - last_time, 0.08)
+                last_time = now
 
-            with self._lock:
-                # Spawn new incoming shoppers periodically
-                if now - last_spawn > random.uniform(2.5, 4.5) and len(self.customers) < 22:
-                    last_spawn = now
-                    cid = self.next_track_id
-                    self.next_track_id += 1
-                    # Spawn near entrance
-                    c = CustomerTrack(cid, (random.uniform(200, 450), 960), target_zone="entrance")
-                    self.customers[cid] = c
+                with self._lock:
+                    # Spawn new incoming shoppers periodically
+                    if now - last_spawn > random.uniform(1.8, 3.2) and len(self.customers) < 24:
+                        last_spawn = now
+                        cid = self.next_track_id
+                        self.next_track_id += 1
+                        c = CustomerTrack(cid, (random.uniform(200, 420), 980), target_zone="entrance")
+                        self.customers[cid] = c
 
-                # Update tracks
-                queue_people = 0
-                to_delete = []
+                    queue_people = 0
+                    to_delete = []
 
-                for cid, c in self.customers.items():
-                    prev_y = c.y
-                    c.update(dt)
+                    for cid, c in list(self.customers.items()):
+                        prev_y = c.y
+                        c.update(dt)
 
-                    # Check Tripwire Entrance Crossing (Y = 940)
-                    if prev_y >= 940 and c.y < 940 and not c.entered:
-                        c.entered = True
-                        self.total_in += 1
-                        self.current_occupancy += 1
-                        self._emit_event("ENTRANCE_IN", {
-                            "customer_id": cid,
-                            "direction": "IN",
-                            "message": f"Customer #{cid} entered the store."
-                        })
+                        # Entrance Tripwire Crossing (Y = 940, moving upwards)
+                        if prev_y >= 940 and c.y < 940 and not c.entered:
+                            c.entered = True
+                            self.total_in += 1
+                            self.current_occupancy += 1
+                            self._emit_event("ENTRANCE_IN", {
+                                "customer_id": cid,
+                                "direction": "IN",
+                                "message": f"Customer #{cid} entered the store."
+                            })
 
-                    if prev_y <= 940 and c.y > 940 and c.target_zone == "exiting" and not c.exited:
-                        c.exited = True
-                        self.total_out += 1
-                        self.current_occupancy = max(0, self.current_occupancy - 1)
-                        self._emit_event("ENTRANCE_OUT", {
-                            "customer_id": cid,
-                            "direction": "OUT",
-                            "message": f"Customer #{cid} departed after checkout."
-                        })
-                        to_delete.append(cid)
+                        # Exit Tripwire Crossing (Y = 940, moving downwards)
+                        if prev_y <= 940 and c.y > 940 and c.target_zone == "exiting" and not c.exited:
+                            c.exited = True
+                            self.total_out += 1
+                            self.current_occupancy = max(0, self.current_occupancy - 1)
+                            self._emit_event("ENTRANCE_OUT", {
+                                "customer_id": cid,
+                                "direction": "OUT",
+                                "message": f"Customer #{cid} departed after checkout."
+                            })
 
-                    # Check Queue ROI: X in [950, 1650], Y in [400, 850]
-                    if 950 <= c.x <= 1650 and 400 <= c.y <= 850:
-                        c.in_queue = True
-                        c.color = "#ffb703" # queue amber
-                        queue_people += 1
+                        # Queue ROI: X in [950, 1550], Y in [280, 660]
+                        if 950 <= c.x <= 1550 and 260 <= c.y <= 660:
+                            c.in_queue = True
+                            c.color = "#ffb703"
+                            queue_people += 1
+                        else:
+                            c.in_queue = False
+                            c.color = "#00f0ff"
+
+                        # Remove shoppers that left through exit
+                        if c.y > 1020 and c.target_zone == "exiting":
+                            to_delete.append(cid)
+
+                    for cid in to_delete:
+                        if cid in self.customers:
+                            del self.customers[cid]
+
+                    self.queue_count = queue_people
+
+                    if self.queue_count >= 5:
+                        self.alert_duration += dt
+                        if not self.queue_alert_active and self.alert_duration > 1.0:
+                            self.queue_alert_active = True
+                            self._emit_event("QUEUE_OVERFLOW_ALERT", {
+                                "message": f"🚨 High queue congestion! {self.queue_count} customers in line. Alerting Cashier #2.",
+                                "recommended_action": "OPEN_REGISTER_02"
+                            })
                     else:
-                        c.in_queue = False
-                        c.color = "#00f0ff" # default cyan
+                        if self.queue_alert_active and self.queue_count <= 3:
+                            self.queue_alert_active = False
+                            self.alert_duration = 0.0
+                            self._emit_event("QUEUE_NORMALIZED", {
+                                "message": f"✅ Queue length normalized ({self.queue_count} customers)."
+                            })
 
-                    # Clean up old exiters
-                    if c.y > 1050:
-                        to_delete.append(cid)
+                    self.avg_wait_time_sec = round(max(15.0, (self.queue_count * 22.0) / self.cashier_registers_active), 1)
 
-                for cid in to_delete:
-                    if cid in self.customers:
-                        del self.customers[cid]
+            except Exception as err:
+                print(f"[EngineError] {err}")
 
-                self.queue_count = queue_people
-
-                # Queue threshold detection (>4 people triggers alert)
-                if self.queue_count >= 5:
-                    self.alert_duration += dt
-                    if not self.queue_alert_active and self.alert_duration > 1.5:
-                        self.queue_alert_active = True
-                        self._emit_event("QUEUE_OVERFLOW_ALERT", {
-                            "message": f"🚨 High queue congestion! {self.queue_count} customers in line. Alerting Cashier #2.",
-                            "recommended_action": "OPEN_REGISTER_02"
-                        })
-                else:
-                    if self.queue_alert_active and self.queue_count <= 3:
-                        self.queue_alert_active = False
-                        self.alert_duration = 0.0
-                        self._emit_event("QUEUE_NORMALIZED", {
-                            "message": f"✅ Queue length normalized ({self.queue_count} customers)."
-                        })
-
-                # Dynamic wait time calculation (approx 20-25s per person per active cashier)
-                self.avg_wait_time_sec = round(max(15.0, (self.queue_count * 22.0) / self.cashier_registers_active), 1)
-
-            time.sleep(0.033) # ~30 fps update
+            time.sleep(0.033)
 
     def get_dashboard_state(self):
         with self._lock:
